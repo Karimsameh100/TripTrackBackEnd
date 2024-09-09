@@ -1,0 +1,12 @@
+__pycache__/
+# .../my_package/__init__.py
+migrations/
+venv/
+env/
+./venv
+.venv
+./backend/backend/__pycache__/
+./backend/backend/migrations/
+./backend/__pycache__/
+./backend/migrations/
+db.sqlite
