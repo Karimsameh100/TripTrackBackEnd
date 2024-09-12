@@ -101,3 +101,11 @@ class User(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return self.is_superuser
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField()
+    rate = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'Review by {self.user.email} with rate {self.rate}'

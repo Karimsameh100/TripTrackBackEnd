@@ -73,7 +73,7 @@
 
 
 from rest_framework import serializers
-from .models import User, Company
+from .models import *
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -122,3 +122,17 @@ class CompanySerializer(serializers.ModelSerializer):
         company.set_password(validated_data['password'])  # تشفير كلمة المرور
         company.save()
         return company
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'user', 'comment', 'rate']
+    
+    def create(self, validated_data):
+        return Review.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.comment = validated_data.get('comment', instance.comment)
+        instance.rate = validated_data.get('rate', instance.rate)
+        instance.save()
+        return instance
