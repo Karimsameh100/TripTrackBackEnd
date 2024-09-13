@@ -13,6 +13,9 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('reviews/', ReviewListCreateView.as_view(), name='review-list-create'),
     path('reviews/<int:pk>/', ReviewDetailView.as_view(), name='review-detail'),
+    path('user/<int:pk>',UserRegisterView_pk.as_view(),name='list_user'),
+    path('Mixinuser_list/',views.Mixinuser_list.as_view()),
+    path('mixinuser_pk/<int:pk>',views.mixinuser_pk.as_view()),
 ]
 
 
