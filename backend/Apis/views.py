@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
-
+from rest_framework import mixins,generics
 # Create your views here.
 
 def home(request):
@@ -68,8 +68,30 @@ class UserRegisterView_pk(APIView):
         user=self.get_object(pk)
         user.delete()
         return Response(status=204)
+# ///////////////////////////////////////////////////////
+#mixins get,post
+class Mixinuser_list(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
+    queryset=User.objects.all()
+    serializer_class=UserSerializer
+    def get(self,request):
+        return self.list(request)
+    
+    def post(self,request):
+        return self.create(request)
 
-
+# mixin_pk get,put,delete 
+class mixinuser_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
+    queryset=User.objects.all()
+    serializer_class=UserSerializer
+    def get(self,request,pk):
+        return self.retrieve(request)
+    
+    def put(self,request,pk):
+        return self.update(request)
+    
+    def delete(self,request,pk):
+        return self.destroy(request)
+# /////////////////////////////////////
 class LoginView(APIView):
     def post(self, request):
         email = request.data.get('email')
