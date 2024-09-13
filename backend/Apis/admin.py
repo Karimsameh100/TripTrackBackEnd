@@ -7,3 +7,6 @@ from .models import User, Company
 
 admin.site.register(User)
 admin.site.register(Company)
+# admin.site.register(Passenger)
+# admin.site.register(Trip)
+# admin.site.register(Schedual)

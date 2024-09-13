@@ -18,8 +18,6 @@ from .serializers import *
 from django.contrib.auth import authenticate
 
 
-
-
 class CompanyRegisterView(APIView):
     def post(self, request):
         serializer = CompanySerializer(data=request.data)
@@ -152,3 +150,26 @@ class ReviewDetailView(APIView):
         
         review.delete()
         return Response({'message': 'Review deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    
+    
+    
+# trips and schedule ------------
+# from django.shortcuts import render
+# from rest_framework import viewsets # type: ignore
+# from .models import * 
+# from .serializers import *
+# # Create your views here.
+
+# class PassengerViewSet(viewsets.ModelViewSet):
+#     queryset=Passenger.objects.all()
+#     serializer_class=PassengerSerializer
+    
+     
+
+# class TripViewSet(viewsets.ModelViewSet):
+#     queryset=Trip.objects.all()
+#     serializer_class=TripSerializer   
+
+# class SchedualViewSet(viewsets.ModelViewSet):
+#     queryset=Schedual.objects.all()
+#     serializer_class=SchedualSerializer  

@@ -49,15 +49,6 @@ class Company(models.Model):
         return self.name
 
 
-
-
-
-
-
-
-
-
-
 class UserManager(BaseUserManager):
     def create_user(self, email, name, phone_number, password=None, **extra_fields):
         if not email:
@@ -73,10 +64,6 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
 
         return self.create_user(email, name, phone_number, password, **extra_fields)
-
-
-
-
 
 
 
@@ -112,3 +99,39 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Review by {self.user.email} with rate {self.rate}'
+    
+    
+    
+# ====trips , schedule , passenger 
+# class Passenger(models.Model):
+#     user_name=models.CharField(max_length=50)
+#     phone=models.CharField(max_length=20)
+#     city=models.CharField(max_length=50)
+#     street=models.CharField(max_length=50)
+#     SSN=models.IntegerField()
+#     # password=models.IntegerField(max_length=20)
+#     email=models.EmailField(max_length=30)
+    
+    
+#     def _str_(self):
+#         return self.user_name  
+
+# class Trip(models.Model):
+#     passenger_id = models.ManyToManyField(Passenger) 
+#     date = models.DateField()
+#     avilable_places = models.IntegerField()
+#     departure_station = models.CharField(max_length=50)
+#     stop_stations = models.CharField(max_length=50) 
+#     departure_time = models.TimeField(max_length=50)
+#     stop_time = models.TimeField(max_length=50) 
+#     price = models.FloatField()
+#     status = models.BooleanField()
+
+#     def _str_(self):
+#         return self.date
+    
+
+# class Schedual(models.Model):
+#     passenger_id = models.ForeignKey(Passenger ,on_delete=models.CASCADE,null=True,blank=True)  
+#     trip_id = models.ForeignKey(Trip ,on_delete=models.CASCADE,null=True,blank=True)  
+
