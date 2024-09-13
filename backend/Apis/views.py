@@ -10,9 +10,11 @@ def home(request):
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Company ,User
+from rest_framework.decorators import api_view
+from .models import Company ,User,Trips,Bus,Booking
 # from .serializers import CompanySerializer,UserSerializer
 from .serializers import *
+from .serializers import CompanySerializer, UserSerializer,TripSerializer,BookSerializer,busSeliarizer
 
 
 from django.contrib.auth import authenticate
@@ -173,3 +175,50 @@ class ReviewDetailView(APIView):
 # class SchedualViewSet(viewsets.ModelViewSet):
 #     queryset=Schedual.objects.all()
 #     serializer_class=SchedualSerializer  
+
+
+
+@api_view(['GET','POST'])
+def trips(request):
+    if request.method == "GET":
+        trips = Trips.objects.all()
+        serializer = TripSerializer(trips, many=True)
+        return Response(serializer.data)
+    elif request.method == "POST":
+        serializer = TripSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+@api_view(['GET','PUT','DELETE'])
+def trip(request, pk):
+    try:
+        trip = Trips.objects.get(pk=pk)
+    except Trips.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == "GET":
+        serializer = TripSerializer(trip)
+        return Response(serializer.data)
+    elif request.method == "PUT":
+        serializer = TripSerializer(trip, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data , status= status.HTTP_205_RESET_CONTENT)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == "DELETE":
+        trip.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+        
+
+    
+    
+
+
+

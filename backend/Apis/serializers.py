@@ -74,6 +74,7 @@
 
 from rest_framework import serializers
 from .models import *
+from .models import User, Company,Trips,Bus,Booking
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -102,7 +103,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ['name', 'email', 'phone_number', 'password', 'confirm_password', 'commercial_register', 'work_license', 'certificates']
+        fields = ['name', 'email', 'phone_number', 'password', 'confirm_password', 'commercial_register', 'work_license', 'certificates','trip','bus']
 
     def validate(self, data):
         if data['password'] != data['confirm_password']:
@@ -169,3 +170,18 @@ class ReviewSerializer(serializers.ModelSerializer):
     
 #     def get_trip_status(self, obj):
 #         return obj.trip_id.status if obj.trip_id else None 
+    
+class TripSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trips
+        fields = "__all__"
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = "__all__"
+
+class busSeliarizer(serializers.ModelSerializer):
+    class Meta:
+        model = Bus
+        fields = "__all__"
