@@ -182,8 +182,7 @@ class AllUsers(models.Model):
         ('company', 'Company'),
         ('user', 'User'),
         ('admin', 'Admin'),
-    )
-    
+    )    
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
