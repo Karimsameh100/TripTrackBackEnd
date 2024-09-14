@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from rest_framework import mixins,generics
-# Create your views here.
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -10,7 +9,10 @@ def home(request):
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+from rest_framework.decorators import permission_classes,api_view
+from rest_framework import permissions
+
 from .models import Company ,User,Trips,Bus,Booking
 # from .serializers import CompanySerializer,UserSerializer
 from .serializers import *
@@ -19,8 +21,20 @@ from .serializers import CompanySerializer, UserSerializer,TripSerializer,BookSe
 
 from django.contrib.auth import authenticate
 
+class CompanyPermissions(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        elif request.method in ['POST', 'PUT', 'DELETE']:
+            return request.user.has_perm('companies.change_company') or request.user.has_perm('companies.add_company')
+        return False
 
 class CompanyRegisterView(APIView):
+    permission_classes=[CompanyPermissions]
+    def get(self,request):
+        company=Company.objects.all()
+        serializer=CompanySerializer(company,many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
     def post(self, request):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
@@ -30,8 +44,18 @@ class CompanyRegisterView(APIView):
 
 
 
+from rest_framework.permissions import BasePermission
+
+class UserPermissions(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        elif request.method in ['POST', 'PUT', 'DELETE']:
+            return request.user.has_perm('auth.change_user') or request.user.has_perm('auth.add_user')
+        return False
 
 class UserRegisterView(APIView):
+    permission_classes = [UserPermissions]
     def get(self,request):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
@@ -45,6 +69,7 @@ class UserRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegisterView_pk(APIView):
+    permission_classes = [UserPermissions]
     def get_object(self,pk):
         try:
             return User.objects.get(pk=pk)
@@ -106,12 +131,23 @@ class LoginView(APIView):
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
     
 
+class ReviewPermissions(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        elif request.method in ['POST', 'PUT', 'DELETE']:
+            return request.user.has_perm('reviews.change_review') or request.user.has_perm('reviews.add_review')
+        return False
+    
+
 class ReviewListCreateView(APIView):
+    permission_classes = [ReviewPermissions]
+
     def get(self, request):
         reviews = Review.objects.all()
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def post(self, request):
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
@@ -120,6 +156,7 @@ class ReviewListCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ReviewDetailView(APIView):
+    permission_classes = [ReviewPermissions]
     def get_object(self, pk):
         try:
             return Review.objects.get(pk=pk)
@@ -176,9 +213,19 @@ class ReviewDetailView(APIView):
 #     queryset=Schedual.objects.all()
 #     serializer_class=SchedualSerializer  
 
+from rest_framework.permissions import BasePermission
+
+class TripPermissions(BasePermission):
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        elif request.method in ['POST', 'PUT', 'DELETE']:
+            return request.user.has_perm('trips.change_trip') or request.user.has_perm('trips.add_trip')
+        return False
 
 
 @api_view(['GET','POST'])
+@permission_classes([TripPermissions])
 def trips(request):
     if request.method == "GET":
         trips = Trips.objects.all()
@@ -194,6 +241,7 @@ def trips(request):
         
 
 @api_view(['GET','PUT','DELETE'])
+@permission_classes([TripPermissions])
 def trip(request, pk):
     try:
         trip = Trips.objects.get(pk=pk)
