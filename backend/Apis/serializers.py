@@ -139,6 +139,24 @@ class ReviewSerializer(serializers.ModelSerializer):
         return instance
     
     
+    
+    
+    from rest_framework import serializers
+
+class AdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Admin
+        fields = '__all__'
+
+class AllUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllUsers
+        fields = '__all__'
+
+    
+    
+    
+    
 # ---trips and passenger and schedule
 
 # class PassengerSerializer(serializers.ModelSerializer):

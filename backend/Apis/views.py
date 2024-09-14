@@ -123,13 +123,38 @@ class LoginView(APIView):
         password = request.data.get('password')
         user = authenticate(username=email, password=password)
         # user = authenticate(username=email, password=password) 
+        # if user:
+        #     if hasattr(user, 'company'):
+        #         return Response({"message": "Logged in as company"}, status=status.HTTP_200_OK)
+        #     else:
+        #         return Response({"message": "Logged in as user"}, status=status.HTTP_200_OK)
+        # return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+    
         if user:
             if hasattr(user, 'company'):
                 return Response({"message": "Logged in as company"}, status=status.HTTP_200_OK)
+            elif hasattr(user, 'admin'):
+                return Response({"message": "Logged in as admin"}, status=status.HTTP_200_OK)
             else:
                 return Response({"message": "Logged in as user"}, status=status.HTTP_200_OK)
+        
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
-    
+
+
+
+
+
+
+class AllUsersView(APIView):
+    def get(self, request):
+        all_users = AllUsers.objects.all()
+        serializer = AllUsersSerializer(all_users, many=True)
+        return Response(serializer.data)
+
+
+
+
+
 
 class ReviewPermissions(permissions.BasePermission):
     def has_permission(self, request, view):

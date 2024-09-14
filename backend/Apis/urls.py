@@ -20,6 +20,7 @@ urlpatterns = [
     path('mixinuser_pk/<int:pk>',views.mixinuser_pk.as_view()),
     path('all/trips/',trips,name='trips'),
     path('selected/trip/<int:pk>',trip,name='trip'),
+    path('all-users/', AllUsersView.as_view(), name='all-users'),
 
 ]
 
