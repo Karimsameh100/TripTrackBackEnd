@@ -16,7 +16,7 @@ from rest_framework import permissions
 from .models import Company ,User,Trips,Bus,Booking
 # from .serializers import CompanySerializer,UserSerializer
 from .serializers import *
-from .serializers import CompanySerializer, UserSerializer,TripSerializer,BookSerializer,busSeliarizer
+from .serializers import CompanySerializer, UserSerializer,TripSerializer,BookSerializer,busSeliarizer,FavoriteSerializer
 
 
 from django.contrib.auth import authenticate
@@ -215,30 +215,6 @@ class ReviewDetailView(APIView):
         review.delete()
         return Response({'message': 'Review deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     
-    
-    
-# trips and schedule ------------
-# from django.shortcuts import render
-# from rest_framework import viewsets # type: ignore
-# from .models import * 
-# from .serializers import *
-# # Create your views here.
-
-# class PassengerViewSet(viewsets.ModelViewSet):
-#     queryset=Passenger.objects.all()
-#     serializer_class=PassengerSerializer
-    
-     
-
-# class TripViewSet(viewsets.ModelViewSet):
-#     queryset=Trip.objects.all()
-#     serializer_class=TripSerializer   
-
-# class SchedualViewSet(viewsets.ModelViewSet):
-#     queryset=Schedual.objects.all()
-#     serializer_class=SchedualSerializer  
-
-
 
 class TripPermissions(BasePermission):
     def has_permission(self, request, view):
