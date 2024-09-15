@@ -162,7 +162,7 @@ class Favorite(models.Model):
 
 
 class City(models.Model):
-    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    review = models.ManyToManyField(Review, related_name='cities')
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
