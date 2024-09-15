@@ -37,6 +37,9 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+    
+    def __str__(self):
+        return self.name
 
     def has_perm(self, perm, obj=None):
         return self.is_superuser
@@ -153,7 +156,10 @@ class Review(models.Model):
     
 
     
-    
+class Favorite(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites',blank=True)
+    trip_id = models.ForeignKey(Trips, on_delete=models.CASCADE, related_name='favorites')
+
     
 # ====trips , schedule , passenger 
 # class Passenger(models.Model):

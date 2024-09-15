@@ -126,8 +126,14 @@ class AllUsersSerializer(serializers.ModelSerializer):
     
 #     def get_trip_status(self, obj):
 #         return obj.trip_id.status if obj.trip_id else None 
+
+class userNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["name"]
     
 class TripSerializer(serializers.ModelSerializer):
+    users=userNameSerializer(source="user_id" , many=True)
     class Meta:
         model = Trips
         fields = "__all__"
@@ -141,3 +147,25 @@ class busSeliarizer(serializers.ModelSerializer):
     class Meta:
         model = Bus
         fields = "__all__"
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ["user_id", "trip_id"]
+        extra_kwargs = {
+            "user_id": {"required": True},
+            "trip_id": {"required": True},
+        }
+
+    def to_representation(self, instance):
+        return {
+            "favorite_id": instance.id,
+            "user_name": instance.user_id.name,
+            "trip_date": instance.trip_id.date,
+            "trip_avilable_places": instance.trip_id.avilabalPlaces,
+            "trip_price": instance.trip_id.price,
+            "trip_departure_time": instance.trip_id.departuerTime,
+            "trip_departure_station": instance.trip_id.departuerStation,
+            "trip_destination_Station": instance.trip_id.destinationStation,
+            "trip_destination_Time": instance.trip_id.destinationTime,
+        }

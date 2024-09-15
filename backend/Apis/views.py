@@ -6,7 +6,7 @@ def home(request):
     return HttpResponse("wellcom to trip track backends")
 
 
-from rest_framework import status
+from rest_framework import status , viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, BasePermission, AllowAny
@@ -286,6 +286,11 @@ def trip(request, pk):
     elif request.method == "DELETE":
         trip.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+class FavoriteViewSet(viewsets.ModelViewSet):
+    queryset=Favorite.objects.all()
+    serializer_class=FavoriteSerializer 
     
 
         
