@@ -1,113 +1,7 @@
-# from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
-# class UserManager(BaseUserManager):
-#     def create_user(self, email, name, phone_number, password=None, **extra_fields):
-#         if not email:
-#             raise ValueError('The Email field must be set')
-#         email = self.normalize_email(email)
-#         user = self.model(email=email, name=name, phone_number=phone_number, **extra_fields)
-#         user.set_password(password)
-#         user.save(using=self._db)
-#         return user
-
-from django.db import models
-
-# Create your models here.
-from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
-
-# class User(AbstractBaseUser):
-#     name = models.CharField(max_length=255)
-#     phone_number = models.CharField(max_length=20)
-#     email = models.EmailField(unique=True)
-#     password = models.CharField(max_length=255)
-#     confirm_password = models.CharField(max_length=255)
-
-#     USERNAME_FIELD = 'email'
-#     REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
-    
-#     # objects = UserManager()
-
-#     def __str__(self):
-#         return self.email
-
-
 # Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.validators import MinValueValidator, MaxValueValidator
-class Booking(models.Model):
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
-    time = models.TimeField()
-    status = models.CharField(max_length=255, default='Pending')
-    numberOfPlaces = models.IntegerField(default=1)
-    totalFare = models.IntegerField()
-    pickupLocation = models.CharField(max_length=255)
-    dropLocation = models.CharField(max_length=255)
-
-
-    def __str__(self):
-        return self.status
-    
-
-class Bus(models.Model):
-    busNumber = models.CharField(max_length=255)
-    busType = models.CharField(max_length=255)
-    busCapacity = models.IntegerField()
-
-    def __str__(self):
-        return self.busNumber
-
-    
-
-
-class Trips(models.Model):
-    tripNumber=models.IntegerField(unique=True)
-    date=models.DateField()
-    avilabalPlaces=models.IntegerField(null=False)
-    departuerStation=models.CharField(max_length=50,null=False)
-    destinationStation=models.CharField(max_length=50,null=False)
-    departuerTime=models.TimeField()
-    destinationTime=models.TimeField()
-    price=models.DecimalField(max_digits=10,decimal_places=2)
-    status=models.CharField(max_length=50,default="Pandding")
-    book = models.ForeignKey(Booking,on_delete=models.CASCADE)
-    # user = models.ForeignKey(User,on_delete=models.CASCADE)
-    bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.book.status
-
-
-class Company(models.Model):
-
-    name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    image = models.ImageField(unique=True, default='images/default.png')
-    about = models.TextField(default="N/A")
-    phone_number = models.CharField(max_length=20)
-    password = models.CharField(max_length=255)
-    confirm_password = models.CharField(max_length=255)
-    commercial_register = models.FileField(upload_to='documents/')
-    work_license = models.FileField(upload_to='documents/')
-    certificates = models.FileField(upload_to='documents/')
-    trip = models.ForeignKey(Trips,on_delete=models.CASCADE,default=1)
-    bus = models.ForeignKey(Bus,on_delete=models.CASCADE, default=1)
-
-
-
-    def __str__(self):
-        return self.name
-    
-
-
-
-
-
-
-
 
 class UserManager(BaseUserManager):
     def create_user(self, email, name, phone_number, password=None, **extra_fields):
@@ -150,17 +44,7 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_superuser
 
-class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment = models.TextField()
-    rate = models.PositiveIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
 
-    def __str__(self):
-        return f'Review by {self.user.email} with rate {self.rate}'
-    
-    
     
 class Admin(models.Model):
     name = models.CharField(max_length=255)
@@ -171,6 +55,72 @@ class Admin(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class Bus(models.Model):
+    busNumber = models.CharField(max_length=255)
+    busType = models.CharField(max_length=255)
+    busCapacity = models.IntegerField()
+
+    def __str__(self):
+        return self.busNumber
+
+
+
+class Booking(models.Model):
+    # user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    time = models.TimeField()
+    status = models.CharField(max_length=255, default='Pending')
+    numberOfPlaces = models.IntegerField(default=1)
+    totalFare = models.IntegerField()
+    pickupLocation = models.CharField(max_length=255)
+    dropLocation = models.CharField(max_length=255)
+
+
+    def __str__(self):
+        return self.status
+    
+
+
+class Trips(models.Model):
+    tripNumber=models.IntegerField(unique=True)
+    date=models.DateField()
+    avilabalPlaces=models.IntegerField(null=False)
+    departuerStation=models.CharField(max_length=50,null=False)
+    destinationStation=models.CharField(max_length=50,null=False)
+    departuerTime=models.TimeField()
+    destinationTime=models.TimeField()
+    price=models.DecimalField(max_digits=10,decimal_places=2)
+    status=models.CharField(max_length=50,default="Pandding")
+    book = models.ForeignKey(Booking,on_delete=models.CASCADE)
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.book.status
+
+
+
+class Company(models.Model):
+
+    name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    image = models.ImageField(unique=True, default='images/default.png')
+    about = models.TextField(default="N/A")
+    phone_number = models.CharField(max_length=20)
+    password = models.CharField(max_length=255)
+    confirm_password = models.CharField(max_length=255)
+    commercial_register = models.FileField(upload_to='documents/')
+    work_license = models.FileField(upload_to='documents/')
+    certificates = models.FileField(upload_to='documents/')
+    trip = models.ForeignKey(Trips,on_delete=models.CASCADE,default=1)
+    bus = models.ForeignKey(Bus,on_delete=models.CASCADE, default=1)
+
+
+    def __str__(self):
+        return self.name
+    
 
     
 class AllUsers(models.Model):
@@ -188,6 +138,20 @@ class AllUsers(models.Model):
         return f"{self.user_type}: {self.company or self.user or self.admin}"
 
     
+
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField()
+    rate = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+
+    def __str__(self):
+        return f'Review by {self.user.email} with rate {self.rate}'
+    
+    
+
     
     
     

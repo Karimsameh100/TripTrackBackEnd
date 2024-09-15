@@ -9,7 +9,7 @@ def home(request):
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, BasePermission, AllowAny
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework import permissions
 
@@ -43,9 +43,6 @@ class CompanyRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-from rest_framework.permissions import BasePermission
-
 class UserPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -53,7 +50,7 @@ class UserPermissions(permissions.BasePermission):
         elif request.method in ['POST', 'PUT', 'DELETE']:
             return request.user.has_perm('auth.change_user') or request.user.has_perm('auth.add_user')
         return False
-from rest_framework.permissions import AllowAny
+
 class UserRegisterView(APIView):
     # permission_classes = [UserPermissions]---------------------
     permission_classes = [AllowAny]
@@ -118,7 +115,7 @@ class mixinuser_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Dest
     def delete(self,request,pk):
         return self.destroy(request)
 # /////////////////////////////////////
-from rest_framework.permissions import AllowAny
+
 class LoginView(APIView):
     permission_classes = [AllowAny] 
     def post(self, request):
@@ -138,36 +135,6 @@ class LoginView(APIView):
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-
-
-
-
-# class AllUsersView(APIView):
-#     def get(self, request):
-#         all_users = AllUsers.objects.all()
-#         serializer = AllUsersSerializer(all_users, many=True)
-#         return Response(serializer.data)
-# from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
-# from rest_framework.response import Response
-# from .models import AllUsers  # تأكد من استيراد AllUsers بشكل صحيح
-# from .serializers import AllUsersSerializer  # تأكد من استيراد AllUsersSerializer
-
-# class AllUsersView(APIView):
-#     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-
-#     def get(self, request):
-#         user_type = request.query_params.get('user_type', None)
-#         if user_type:
-#             all_users = AllUsers.objects.filter(user_type=user_type)
-#         else:
-#             all_users = AllUsers.objects.all()
-
-#         serializer = AllUsersSerializer(all_users, many=True)
-#         return Response(serializer.data)
-
-#     def get_queryset(self):
-#         return AllUsers.objects.all()
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import AllUsers
 from .serializers import AllUsersSerializer
@@ -271,7 +238,7 @@ class ReviewDetailView(APIView):
 #     queryset=Schedual.objects.all()
 #     serializer_class=SchedualSerializer  
 
-from rest_framework.permissions import BasePermission
+
 
 class TripPermissions(BasePermission):
     def has_permission(self, request, view):
