@@ -85,20 +85,16 @@ class Company(models.Model):
 
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
-    # image = models.ImageField(unique=True)
-    image = models.ImageField(unique=True, null=True, blank=True)
-    # about = models.TextField()
-    about = models.TextField(default="Default about information") 
+    image = models.ImageField(unique=True, default='images/default.png')
+    about = models.TextField(default="N/A")
     phone_number = models.CharField(max_length=20)
     password = models.CharField(max_length=255)
     confirm_password = models.CharField(max_length=255)
     commercial_register = models.FileField(upload_to='documents/')
     work_license = models.FileField(upload_to='documents/')
     certificates = models.FileField(upload_to='documents/')
-    # trip = models.ForeignKey(Trips,on_delete=models.CASCADE)
-    trip = models.ForeignKey(Trips, on_delete=models.CASCADE, null=True, blank=True)
-    # bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
-    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)   
+    trip = models.ForeignKey(Trips,on_delete=models.CASCADE,default=1)
+    bus = models.ForeignKey(Bus,on_delete=models.CASCADE, default=1)
 
 
 
@@ -163,36 +159,6 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Review by {self.user.email} with rate {self.rate}'
-    
-    
-    
-class Admin(models.Model):
-    name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=20)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
-    confirm_password = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.email
-
-    
-class AllUsers(models.Model):
-    USER_TYPE_CHOICES = (
-        ('company', 'Company'),
-        ('user', 'User'),
-        ('admin', 'Admin'),
-    )
-    
-    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.user_type}: {self.company or self.user or self.admin}"
-
-    
     
     
     

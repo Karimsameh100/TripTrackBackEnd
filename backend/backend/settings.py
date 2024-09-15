@@ -84,7 +84,9 @@ DATABASES = {
         'HOST': 'localhost',#127.0.0.1
         'PORT': '5432',
     }
-}
+} 
+
+
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
