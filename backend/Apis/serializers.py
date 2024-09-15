@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import *
-from .models import User, Company,Trips,Bus,Booking
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -25,8 +24,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
          # إعشان لو ضفنا يوزر جديد يضيفه ف ال AllUsers
         all_users_entry = AllUsers.objects.create(
-            user=user,
-            user_type='user' 
+            user_type='user',  # Only specify the user_type
+            email=user.email,
+            name=user.name,
+            phone_number=user.phone_number,
+            password=user.password,  # Already hashed
+            confirm_password=user.password
         )
         all_users_entry.save()
         return user
@@ -45,9 +48,6 @@ class CompanySerializer(serializers.ModelSerializer):
    
     def create(self, validated_data):
         company = Company(
-            email=validated_data['email'],
-            name=validated_data['name'],
-            phone_number=validated_data['phone_number'],
             commercial_register=validated_data['commercial_register'],
             work_license=validated_data['work_license'],
             certificates=validated_data['certificates'],
@@ -56,8 +56,12 @@ class CompanySerializer(serializers.ModelSerializer):
         company.save()
        
         all_users_entry = AllUsers.objects.create(
-            company=company,
-            user_type='company' 
+            user_type='company',
+            email=company.email,
+            name=company.name,
+            phone_number=company.phone_number,
+            password=company.password,  # Already hashed
+            confirm_password=company.password  # This can be removed if not needed
         )
         all_users_entry.save()
         return company
@@ -78,9 +82,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     
     
     
-    
-    from rest_framework import serializers
-
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Admin
@@ -93,40 +94,6 @@ class AllUsersSerializer(serializers.ModelSerializer):
 
     
     
-    
-    
-# ---trips and passenger and schedule
-
-# class PassengerSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model= Passenger
-#         fields= ['id','user_name','phone','city','street','SSN','email']
-
-# class PassengerNameSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Passenger
-#         fields = ['user_name']       
-        
-# class TripSerializer(serializers.ModelSerializer):
-#     passengers = PassengerNameSerializer(source='passenger_id', many=True)  # Show only user_name
-
-#     class Meta:
-#         model = Trip
-#         fields = ['date', 'avilable_places', 'departure_station', 'stop_stations', 'departure_time', 'stop_time', 'price', 'status', 'passengers']
-
-# class SchedualSerializer(serializers.ModelSerializer):
-#     passenger_name =  serializers.SerializerMethodField()
-#     trip_status =  serializers.SerializerMethodField()
-#     class Meta:
-#         model = Schedual
-#         fields = ['id','passenger_name', 'trip_status'] 
-
-#     def get_passenger_Name(self, obj):
-#         return obj.passenger_id.user_name if obj.passenger_id else None 
-    
-#     def get_trip_status(self, obj):
-#         return obj.trip_id.status if obj.trip_id else None 
-
 class userNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -169,3 +136,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
             "trip_destination_Station": instance.trip_id.destinationStation,
             "trip_destination_Time": instance.trip_id.destinationTime,
         }
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = '__all__'

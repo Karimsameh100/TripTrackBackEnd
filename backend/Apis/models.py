@@ -20,13 +20,44 @@ class UserManager(BaseUserManager):
         return self.create_user(email, name, phone_number, password, **extra_fields)
 
 
-
-class User(AbstractBaseUser):
+class AllUsers(AbstractBaseUser):
+    USER_TYPE_CHOICES = (
+        ('company', 'Company'),
+        ('user', 'User'),
+        ('admin', 'Admin'),
+    )
+    
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+    email = models.EmailField(unique=True)
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20)
-    email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
     confirm_password = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.user_type}: {self.name}"
+
+class Admin(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+    is_staff = models.BooleanField(default=True)
+    is_superuser = models.BooleanField(default=True)
+
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+    
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
+
+class User(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
@@ -37,9 +68,6 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
-    
-    def __str__(self):
-        return self.name
 
     def has_perm(self, perm, obj=None):
         return self.is_superuser
@@ -47,17 +75,16 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_superuser
 
+    @property
+    def is_anonymous(self):
+        return False
 
-    
-class Admin(models.Model):
-    name = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=20)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
-    confirm_password = models.CharField(max_length=255)
+    @property
+    def is_authenticated(self):
+        return True
 
-    def __str__(self):
-        return self.email
+    def has_module_perms(self, app_label):
+        return self.is_superuser
 
 
 class Bus(models.Model):
@@ -103,44 +130,18 @@ class Trips(models.Model):
     def __str__(self):
         return self.book.status
 
-
-
-class Company(models.Model):
-
-    name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    image = models.ImageField(unique=True, default='images/default.png')
-    about = models.TextField(default="N/A")
-    phone_number = models.CharField(max_length=20)
-    password = models.CharField(max_length=255)
-    confirm_password = models.CharField(max_length=255)
+class Company(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+    image = models.ImageField(unique=True, null=True, blank=True)
+    about = models.TextField(default="Default about information")
     commercial_register = models.FileField(upload_to='documents/')
     work_license = models.FileField(upload_to='documents/')
     certificates = models.FileField(upload_to='documents/')
-    trip = models.ForeignKey(Trips,on_delete=models.CASCADE,default=1)
-    bus = models.ForeignKey(Bus,on_delete=models.CASCADE, default=1)
-
-
+    trip = models.ForeignKey(Trips, on_delete=models.CASCADE, null=True, blank=True)
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
+    USERNAME_FIELD = 'email'
     def __str__(self):
         return self.name
-    
-
-    
-class AllUsers(models.Model):
-    USER_TYPE_CHOICES = (
-        ('company', 'Company'),
-        ('user', 'User'),
-        ('admin', 'Admin'),
-    )    
-    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.user_type}: {self.company or self.user or self.admin}"
-
-    
 
 
 class Review(models.Model):
@@ -154,10 +155,19 @@ class Review(models.Model):
         return f'Review by {self.user.email} with rate {self.rate}'
     
     
-
     
 class Favorite(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites',blank=True)
     trip_id = models.ForeignKey(Trips, on_delete=models.CASCADE, related_name='favorites')
 
-    
+
+class City(models.Model):
+    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    image = models.ImageField(unique=True, null=True, blank=True)
+    info = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name

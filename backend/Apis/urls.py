@@ -21,6 +21,8 @@ urlpatterns = [
     path('all/trips/',trips,name='trips'),
     path('selected/trip/<int:pk>',trip,name='trip'),
     path('all-users/', AllUsersView.as_view(), name='all-users'),
+     path('cities/', CityView.as_view(), name='city-list'),
+    path('cities/<int:pk>/', CityView.as_view(), name='city-detail'),
 
 ]
 

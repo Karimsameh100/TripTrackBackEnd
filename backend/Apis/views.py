@@ -13,13 +13,10 @@ from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, Bas
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework import permissions
 
-from .models import Company ,User,Trips,Bus,Booking
-# from .serializers import CompanySerializer,UserSerializer
+from .models import *
 from .serializers import *
-from .serializers import CompanySerializer, UserSerializer,TripSerializer,BookSerializer,busSeliarizer,FavoriteSerializer
-
-
 from django.contrib.auth import authenticate
+
 
 class CompanyPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -135,9 +132,7 @@ class LoginView(APIView):
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-from rest_framework.response import Response
-from .models import AllUsers
-from .serializers import AllUsersSerializer
+
 
 class AllUsersView(APIView):
     permission_classes = [AllowAny]  # استخدم AllowAny مؤقتًا للتأكد من أن المشكلة ليست في الصلاحيات
@@ -154,8 +149,6 @@ class AllUsersView(APIView):
 
 
 
-
-
 class ReviewPermissions(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
@@ -166,7 +159,7 @@ class ReviewPermissions(permissions.BasePermission):
     
 
 class ReviewListCreateView(APIView):
-    permission_classes = [ReviewPermissions]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         reviews = Review.objects.all()
@@ -181,7 +174,7 @@ class ReviewListCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ReviewDetailView(APIView):
-    permission_classes = [ReviewPermissions]
+    permission_classes = [AllowAny]
     def get_object(self, pk):
         try:
             return Review.objects.get(pk=pk)
@@ -268,10 +261,47 @@ class FavoriteViewSet(viewsets.ModelViewSet):
     queryset=Favorite.objects.all()
     serializer_class=FavoriteSerializer 
     
-
-        
-
+class CityView(APIView):
+    permission_classes = [AllowAny]
     
+    def get_queryset(self):
+        return City.objects.all()
+
+    def get_object(self, pk):
+        try:
+            return self.get_queryset().get(pk=pk)
+        except City.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None):
+        if pk:
+            city = self.get_object(pk)
+            serializer = CitySerializer(city)
+            return Response(serializer.data)
+        else:
+            cities = self.get_queryset()
+            serializer = CitySerializer(cities, many=True)
+            return Response(serializer.data)
+
+    def post(self, request):
+        serializer = CitySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        city = self.get_object(pk)
+        serializer = CitySerializer(city, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        city = self.get_object(pk)
+        city.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 
