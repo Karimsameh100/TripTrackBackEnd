@@ -162,6 +162,35 @@ class Review(models.Model):
     
     
     
+class Admin(models.Model):
+    name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=255)
+    confirm_password = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.email
+
+    
+class AllUsers(models.Model):
+    USER_TYPE_CHOICES = (
+        ('company', 'Company'),
+        ('user', 'User'),
+        ('admin', 'Admin'),
+    )    
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user_type}: {self.company or self.user or self.admin}"
+
+    
+    
+    
+    
 # ====trips , schedule , passenger 
 # class Passenger(models.Model):
 #     user_name=models.CharField(max_length=50)

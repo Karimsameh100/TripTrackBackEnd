@@ -97,6 +97,12 @@ class UserSerializer(serializers.ModelSerializer):
         )
         user.set_password(validated_data['password'])  
         user.save()
+         # إعشان لو ضفنا يوزر جديد يضيفه ف ال AllUsers
+        all_users_entry = AllUsers.objects.create(
+            user=user,
+            user_type='user' 
+        )
+        all_users_entry.save()
         return user
 
 
@@ -122,6 +128,12 @@ class CompanySerializer(serializers.ModelSerializer):
         )
         company.set_password(validated_data['password'])  # تشفير كلمة المرور
         company.save()
+       
+        all_users_entry = AllUsers.objects.create(
+            company=company,
+            user_type='company' 
+        )
+        all_users_entry.save()
         return company
 
 class ReviewSerializer(serializers.ModelSerializer):

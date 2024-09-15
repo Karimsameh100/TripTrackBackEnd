@@ -53,9 +53,10 @@ class UserPermissions(permissions.BasePermission):
         elif request.method in ['POST', 'PUT', 'DELETE']:
             return request.user.has_perm('auth.change_user') or request.user.has_perm('auth.add_user')
         return False
-
+from rest_framework.permissions import AllowAny
 class UserRegisterView(APIView):
-    permission_classes = [UserPermissions]
+    # permission_classes = [UserPermissions]---------------------
+    permission_classes = [AllowAny]
     def get(self,request):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
@@ -117,18 +118,14 @@ class mixinuser_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Dest
     def delete(self,request,pk):
         return self.destroy(request)
 # /////////////////////////////////////
+from rest_framework.permissions import AllowAny
 class LoginView(APIView):
+    permission_classes = [AllowAny] 
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(username=email, password=password)
-        # user = authenticate(username=email, password=password) 
-        # if user:
-        #     if hasattr(user, 'company'):
-        #         return Response({"message": "Logged in as company"}, status=status.HTTP_200_OK)
-        #     else:
-        #         return Response({"message": "Logged in as user"}, status=status.HTTP_200_OK)
-        # return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+     
     
         if user:
             if hasattr(user, 'company'):
@@ -145,12 +142,48 @@ class LoginView(APIView):
 
 
 
+# class AllUsersView(APIView):
+#     def get(self, request):
+#         all_users = AllUsers.objects.all()
+#         serializer = AllUsersSerializer(all_users, many=True)
+#         return Response(serializer.data)
+# from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
+# from rest_framework.response import Response
+# from .models import AllUsers  # تأكد من استيراد AllUsers بشكل صحيح
+# from .serializers import AllUsersSerializer  # تأكد من استيراد AllUsersSerializer
+
+# class AllUsersView(APIView):
+#     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+
+#     def get(self, request):
+#         user_type = request.query_params.get('user_type', None)
+#         if user_type:
+#             all_users = AllUsers.objects.filter(user_type=user_type)
+#         else:
+#             all_users = AllUsers.objects.all()
+
+#         serializer = AllUsersSerializer(all_users, many=True)
+#         return Response(serializer.data)
+
+#     def get_queryset(self):
+#         return AllUsers.objects.all()
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from .models import AllUsers
+from .serializers import AllUsersSerializer
+
 class AllUsersView(APIView):
+    permission_classes = [AllowAny]  # استخدم AllowAny مؤقتًا للتأكد من أن المشكلة ليست في الصلاحيات
+
     def get(self, request):
-        all_users = AllUsers.objects.all()
+        user_type = request.query_params.get('user_type', None)
+        if user_type:
+            all_users = AllUsers.objects.filter(user_type=user_type)
+        else:
+            all_users = AllUsers.objects.all()
+
         serializer = AllUsersSerializer(all_users, many=True)
         return Response(serializer.data)
-
 
 
 
