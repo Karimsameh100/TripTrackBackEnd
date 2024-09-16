@@ -69,7 +69,7 @@ class User(AllUsers):
     def __str__(self):
         return self.email
 
-    def has_perms(self, perm, obj=None):
+    def has_perm(self, perm, obj=None):
         return self.is_superuser
 
     def has_module_perms(self, app_label):
