@@ -100,13 +100,15 @@ class AllUsersSerializer(serializers.ModelSerializer):
 class userNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["name"]
+        fields = ["email"]
     
-class TripSerializer(serializers.ModelSerializer):
+
+        
+class TripsSerializer(serializers.ModelSerializer):
     users=userNameSerializer(source="user_id" , many=True)
     class Meta:
         model = Trips
-        fields = "__all__"
+        fields = '__all__'  # Include all fields of the Trips model
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
@@ -118,7 +120,10 @@ class busSeliarizer(serializers.ModelSerializer):
         model = Bus
         fields = "__all__"
 
+
+
 class FavoriteSerializer(serializers.ModelSerializer):
+  
     class Meta:
         model = Favorite
         fields = ["user_id", "trip_id"]
@@ -139,6 +144,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
             "trip_destination_Station": instance.trip_id.destinationStation,
             "trip_destination_Time": instance.trip_id.destinationTime,
         }
+
 
 class CitySerializer(serializers.ModelSerializer):
     class Meta:
