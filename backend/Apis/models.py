@@ -166,7 +166,8 @@ class City(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    image = models.ImageField(unique=True, null=True, blank=True)
+    #image = models.ImageField(unique=True, null=True, blank=True)
+    image = models.URLField(null=True, blank=True)
     info = models.TextField(null=True, blank=True)
 
     def __str__(self):
