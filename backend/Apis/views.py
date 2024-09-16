@@ -223,10 +223,10 @@ class TripPermissions(BasePermission):
 def trips(request):
     if request.method == "GET":
         trips = Trips.objects.all()
-        serializer = TripSerializer(trips, many=True)
+        serializer = TripsSerializer(trips, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
-        serializer = TripSerializer(data=request.data)
+        serializer = TripsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -243,10 +243,10 @@ def trip(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == "GET":
-        serializer = TripSerializer(trip)
+        serializer = TripsSerializer(trip)
         return Response(serializer.data)
     elif request.method == "PUT":
-        serializer = TripSerializer(trip, data=request.data)
+        serializer = TripsSerializer(trip, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data , status= status.HTTP_205_RESET_CONTENT)
