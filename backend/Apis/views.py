@@ -257,9 +257,13 @@ def trip(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     
-class FavoriteViewSet(viewsets.ModelViewSet):
-    queryset=Favorite.objects.all()
-    serializer_class=FavoriteSerializer 
+
+    
+class FavoriteListCreateView(generics.ListCreateAPIView):
+    permission_classes = [AllowAny]
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+    
     
 class CityView(APIView):
     permission_classes = [AllowAny]

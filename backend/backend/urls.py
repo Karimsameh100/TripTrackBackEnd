@@ -17,17 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from Apis.views import *
-from rest_framework.routers import DefaultRouter # type: ignore
-
-router = DefaultRouter()
-router.register(r'Favorite', FavoriteViewSet ,  basename='Favorite')
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Apis.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('', include('Apis.urls')),
-    path('', include(router.urls)),
+   
 
-]+ router.urls 
+]

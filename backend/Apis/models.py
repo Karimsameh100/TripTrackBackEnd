@@ -1,6 +1,6 @@
 # Create your models here.
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager ,PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class UserManager(BaseUserManager):
@@ -69,7 +69,7 @@ class User(AllUsers):
     def __str__(self):
         return self.email
 
-    def has_perm(self, perm, obj=None):
+    def has_perms(self, perm, obj=None):
         return self.is_superuser
 
     def has_module_perms(self, app_label):
@@ -157,8 +157,10 @@ class Review(models.Model):
     
     
 class Favorite(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites',blank=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     trip_id = models.ForeignKey(Trips, on_delete=models.CASCADE, related_name='favorites')
+    
+
 
 
 class City(models.Model):
