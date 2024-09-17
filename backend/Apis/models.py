@@ -123,9 +123,9 @@ class Trips(models.Model):
     destinationTime=models.TimeField()
     price=models.DecimalField(max_digits=10,decimal_places=2)
     status=models.CharField(max_length=50,default="Pandding")
-    book = models.ForeignKey(Booking,on_delete=models.CASCADE)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
+    book = models.ForeignKey(Booking,on_delete=models.CASCADE,default=1)
 
     def __str__(self):
         return self.book.status
@@ -152,7 +152,7 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return f'Review by {self.user.email} with rate {self.rate}'
+        return f'Review by {self.ReviewCustomerName.email} with rate {self.ReviewCustomerRate}'
     
     
     
@@ -168,7 +168,6 @@ class City(models.Model):
     companies = models.ForeignKey(Company, on_delete=models.CASCADE)
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
     city = models.CharField(max_length=255)
-    #image = models.ImageField(unique=True, null=True, blank=True)
     image = models.URLField(null=True, blank=True)
     info = models.TextField(null=True, blank=True)
 
