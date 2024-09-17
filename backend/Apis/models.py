@@ -145,9 +145,9 @@ class Company(AllUsers):
 
 
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment = models.TextField()
-    rate = models.PositiveIntegerField(
+    ReviewCustomerName = models.ForeignKey(User, on_delete=models.CASCADE)
+    Review = models.TextField()
+    ReviewCustomerRate = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
 
@@ -164,13 +164,13 @@ class Favorite(models.Model):
 
 
 class City(models.Model):
-    review = models.ManyToManyField(Review, related_name='cities')
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    Reviews = models.ManyToManyField(Review, related_name='cities')
+    companies = models.ForeignKey(Company, on_delete=models.CASCADE)
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
     #image = models.ImageField(unique=True, null=True, blank=True)
     image = models.URLField(null=True, blank=True)
     info = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.city
