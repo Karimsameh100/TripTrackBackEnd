@@ -24,6 +24,9 @@ urlpatterns = [
     path('cities/', CityView.as_view(), name='city-list'),
     path('cities/<int:pk>/', CityView.as_view(), name='city-detail'),
     path('favorites/', FavoriteListCreateView.as_view(), name='favorite-list-create'),
+    path('user/admin/', AdminView.as_view(), name='admin-list'),
+    path('user/admin/<int:pk>/', AdminView_pk.as_view(), name='admin-detail'),
+
 
 
 ]

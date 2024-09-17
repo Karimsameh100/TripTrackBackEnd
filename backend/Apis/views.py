@@ -88,6 +88,63 @@ class UserRegisterView_pk(APIView):
         user=self.get_object(pk)
         user.delete()
         return Response(status=204)
+    
+
+class AdminPermissions(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return True
+        elif request.method in ['POST', 'PUT', 'DELETE']:
+            if request.user.is_anonymous:  # Check if the user is anonymous
+                return False
+            return request.user.is_admin  # Check if the user is an Admin
+        return False
+    
+class AdminView(APIView):
+    permission_classes = [AdminPermissions]
+    queryset = Admin.objects.all()
+    serializer_class = AdminSerializer
+
+    def get(self, request):
+        admins = self.queryset.all()
+        serializer = self.serializer_class(admins, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Admin created successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AdminView_pk(APIView):
+    permission_classes = [AdminPermissions]
+    queryset = Admin.objects.all()
+    serializer_class = AdminSerializer
+
+    def get_object(self, pk):
+        try:
+            return self.queryset.get(pk=pk)
+        except Admin.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        admin = self.get_object(pk)
+        serializer = self.serializer_class(admin)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        admin = self.get_object(pk)
+        serializer = self.serializer_class(admin, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, pk):
+        admin = self.get_object(pk)
+        admin.delete()
+        return Response(status=204)
 # ///////////////////////////////////////////////////////
 #mixins get,post
 class Mixinuser_list(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
@@ -223,10 +280,10 @@ class TripPermissions(BasePermission):
 def trips(request):
     if request.method == "GET":
         trips = Trips.objects.all()
-        serializer = TripSerializer(trips, many=True)
+        serializer = TripsSerializer(trips, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
-        serializer = TripSerializer(data=request.data)
+        serializer = TripsSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -243,10 +300,10 @@ def trip(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
     if request.method == "GET":
-        serializer = TripSerializer(trip)
+        serializer = TripsSerializer(trip)
         return Response(serializer.data)
     elif request.method == "PUT":
-        serializer = TripSerializer(trip, data=request.data)
+        serializer = TripsSerializer(trip, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data , status= status.HTTP_205_RESET_CONTENT)
