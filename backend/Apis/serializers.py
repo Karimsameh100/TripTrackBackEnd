@@ -106,7 +106,7 @@ class userNameSerializer(serializers.ModelSerializer):
 
         
 class TripsSerializer(serializers.ModelSerializer):
-    users=userNameSerializer(source="user_id" , many=True)
+    users=userNameSerializer(source="user" , read_only=True)
     class Meta:
         model = Trips
         fields = '__all__'  # Include all fields of the Trips model

@@ -266,17 +266,23 @@ class ReviewDetailView(APIView):
         return Response({'message': 'Review deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     
 
-class TripPermissions(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return True
-        elif request.method in ['POST', 'PUT', 'DELETE']:
-            return request.user.has_perm('trips.change_trip') or request.user.has_perm('trips.add_trip')
-        return False
+# from django.contrib.auth import authenticate
 
+# class TripPermissions(BasePermission):
+#     def has_permission(self, request, view):
+#         if request.method in ['GET', 'HEAD', 'OPTIONS']:
+#             return True
+#         elif request.method in ['POST', 'PUT', 'DELETE']:
+#             username = request.data.get('username')
+#             password = request.data.get('password')
+#             user = authenticate(username=username, password=password)
+#             if user is not None:
+#                 return user.has_perm('trips.change_trip') or user.has_perm('trips.add_trip')
+#             return False
+#         return False
 
 @api_view(['GET','POST'])
-@permission_classes([TripPermissions])
+@permission_classes([AllowAny])
 def trips(request):
     if request.method == "GET":
         trips = Trips.objects.all()
@@ -292,7 +298,7 @@ def trips(request):
         
 
 @api_view(['GET','PUT','DELETE'])
-@permission_classes([TripPermissions])
+@permission_classes([AllowAny])
 def trip(request, pk):
     try:
         trip = Trips.objects.get(pk=pk)
