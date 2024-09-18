@@ -137,7 +137,7 @@ class Company(AllUsers):
     commercial_register = models.FileField(upload_to='documents/')
     work_license = models.FileField(upload_to='documents/')
     certificates = models.FileField(upload_to='documents/')
-    trip = models.ForeignKey(Trips, on_delete=models.CASCADE, null=True, blank=True)
+    trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
     USERNAME_FIELD = 'email'
     def __str__(self):
@@ -165,7 +165,7 @@ class Favorite(models.Model):
 
 class City(models.Model):
     Reviews = models.ManyToManyField(Review, related_name='cities')
-    companies = models.ForeignKey(Company, on_delete=models.CASCADE)
+    companies = models.ManyToManyField(Company, related_name='cities')
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
     city = models.CharField(max_length=255)
     image = models.URLField(null=True, blank=True)

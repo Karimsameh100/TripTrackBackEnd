@@ -38,7 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ['name', 'email', 'phone_number', 'password', 'confirm_password', 'commercial_register', 'work_license', 'certificates','trip','bus']
+        fields = '__all__'
 
     def validate(self, data):
         if data['password'] != data['confirm_password']:
@@ -147,6 +147,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class CitySerializer(serializers.ModelSerializer):
+    Reviews = ReviewSerializer(many=True, read_only=False)
+    companies = CompanySerializer(many=True, read_only=False)
+
     class Meta:
         model = City
         fields = '__all__'
