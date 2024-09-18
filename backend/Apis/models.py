@@ -33,6 +33,7 @@ class AllUsers(AbstractBaseUser):
     phone_number = models.CharField(max_length=20)
     password = models.CharField(max_length=255)
     confirm_password = models.CharField(max_length=255)
+    image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user_type}: {self.name}"
@@ -132,7 +133,6 @@ class Trips(models.Model):
 
 class Company(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
-    image = models.ImageField(unique=True, null=True, blank=True)
     about = models.TextField(default="Default about information")
     commercial_register = models.FileField(upload_to='documents/')
     work_license = models.FileField(upload_to='documents/')
@@ -145,7 +145,7 @@ class Company(AllUsers):
 
 
 class Review(models.Model):
-    ReviewCustomerName = models.ForeignKey(User, on_delete=models.CASCADE)
+    ReviewCustomerDetails = models.ForeignKey(User, on_delete=models.CASCADE)
     Review = models.TextField()
     ReviewCustomerRate = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)]

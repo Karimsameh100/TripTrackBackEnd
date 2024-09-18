@@ -5,7 +5,7 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['name', 'phone_number', 'email', 'password', 'confirm_password']
+        fields = '__all__'
 
    
     def validate(self, data):
@@ -70,6 +70,7 @@ class CompanySerializer(serializers.ModelSerializer):
         return company
 
 class ReviewSerializer(serializers.ModelSerializer):
+    ReviewCustomerDetails = UserSerializer(read_only=True)
     class Meta:
         model = Review
         fields = '__all__'
