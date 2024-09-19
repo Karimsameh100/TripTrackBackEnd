@@ -102,7 +102,7 @@ class Bus(models.Model):
 class Booking(models.Model):
     # user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
-    time = models.TimeField()
+    time = models.TimeField(auto_now=True)
     status = models.CharField(max_length=255, default='Pending')
     numberOfPlaces = models.IntegerField(default=1)
     totalFare = models.IntegerField()
@@ -132,6 +132,7 @@ class Trips(models.Model):
     def __str__(self):
         return self.book.status
 
+
 class Company(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
     about = models.TextField(default="Default about information")
@@ -155,7 +156,7 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Review by {self.ReviewCustomerDetails.email} with rate {self.ReviewCustomerRate}'
-    
+3    
     
     
 class Favorite(models.Model):
