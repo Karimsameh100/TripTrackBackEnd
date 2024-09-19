@@ -6,34 +6,41 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'confirm_password': {'write_only': True}
+        }
 
-   
     def validate(self, data):
-        if data['password'] != data['confirm_password']:
+        if 'confirm_password' in data and data.get('password') != data.get('confirm_password'):
             raise serializers.ValidationError("Passwords must match.")
         return data
 
-    
     def create(self, validated_data):
+        password = validated_data.pop('password', None)
         user = User(
             email=validated_data['email'],
             name=validated_data['name'],
             phone_number=validated_data['phone_number'],
             user_type=validated_data.get('user_type', 'user')
         )
-        user.set_password(validated_data['password'])  
+        if password:
+            user.set_password(password)
         user.save()
-         # إعشان لو ضفنا يوزر جديد يضيفه ف ال AllUsers
-        all_users_entry = AllUsers.objects.create(
-            user_type=user.user_type,  # Only specify the user_type
-            email=user.email,
-            name=user.name,
-            phone_number=user.phone_number,
-            password=user.password,  # Already hashed
-            confirm_password=user.password
-        )
-        all_users_entry.save()
         return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        instance.email = validated_data.get('email', instance.email)
+        instance.name = validated_data.get('name', instance.name)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.user_type = validated_data.get('user_type', instance.user_type)
+        
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
 
 
 class CompanySerializer(serializers.ModelSerializer):

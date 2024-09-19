@@ -73,7 +73,7 @@ class UserRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegisterView_pk(APIView):
-    permission_classes = [UserPermissions]
+    permission_classes = [AllowAny]
     def get_object(self,pk):
         try:
             return User.objects.get(pk=pk)
