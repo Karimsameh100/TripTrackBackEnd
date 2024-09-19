@@ -2,6 +2,9 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from rest_framework import mixins,generics
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -16,7 +19,7 @@ from rest_framework import permissions
 
 from .models import *
 from .serializers import *
-from django.contrib.auth import authenticate
+
 
 
 class CompanyPermissions(permissions.BasePermission):
@@ -24,7 +27,7 @@ class CompanyPermissions(permissions.BasePermission):
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
             return True
         elif request.method in ['POST', 'PUT', 'DELETE']:
-            return request.user.has_perm('companies.change_company') or request.user.has_perm('companies.add_company')
+           return True
         return False
 
 class CompanyRegisterView(APIView):
@@ -60,6 +63,11 @@ class UserRegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            # Check if email already exists
+            email = serializer.validated_data.get('email')
+            if AllUsers.objects.filter(email=email).exists():
+                return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            
             serializer.save()
             return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -172,25 +180,36 @@ class mixinuser_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.Dest
 # /////////////////////////////////////
 
 class LoginView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(username=email, password=password)
-     
-    
+        print(f"Attempting to authenticate: {email}")
+        user = authenticate(request, email=email, password=password)
+        print(user)
+
+        # Log the type of password
+        print(f"Type of password received: {type(password)}")
+        print(f"Password received: {password}")
+
         if user:
-            if hasattr(user, 'company'):
-                return Response({"message": "Logged in as company", "user_type": "company"}, status=status.HTTP_200_OK)
-            elif hasattr(user, 'admin'):
-                return Response({"message": "Logged in as admin", "user_type": "admin"}, status=status.HTTP_200_OK)
-            else:
-                return Response({"message": "Logged in as user", "user_type": "user"}, status=status.HTTP_200_OK)
+            # Create a JWT token for the authenticated user
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            # Serialize user data
+            serializer = UserSerializer(user)
+            user_data = serializer.data
+
+            return Response({
+                "message": "Login successful",
+                "user_type": "company" if hasattr(user, 'company') else "admin" if hasattr(user, 'admin') else "user",
+                "user_info": user_data,
+                "token": access_token
+            }, status=status.HTTP_200_OK)
         
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-
 
 class AllUsersView(APIView):
     permission_classes = [AllowAny]  # استخدم AllowAny مؤقتًا للتأكد من أن المشكلة ليست في الصلاحيات

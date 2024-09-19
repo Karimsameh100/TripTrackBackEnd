@@ -44,10 +44,13 @@ class CompanySerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['password'] != data['confirm_password']:
             raise serializers.ValidationError("Passwords must match.")
+        if not isinstance(data.get('password'), str):
+            raise serializers.ValidationError("Password must be a string.")
         return data
 
    
     def create(self, validated_data):
+        password = validated_data.pop('password')
         company = Company(
             email=validated_data['email'],
             name=validated_data['name'],
@@ -57,7 +60,7 @@ class CompanySerializer(serializers.ModelSerializer):
             certificates=validated_data['certificates'],
             user_type=validated_data.get('user_type', 'company')
         )
-        company.set_password(validated_data['password'])  # تشفير كلمة المرور
+        company.set_password(password)  # تشفير كلمة المرور
         company.save()
        
         all_users_entry = AllUsers.objects.create(

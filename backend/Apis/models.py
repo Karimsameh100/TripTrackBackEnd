@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager ,PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, name, phone_number, password=None, **extra_fields):
         if not email:
@@ -140,6 +141,7 @@ class Company(AllUsers):
     trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
     USERNAME_FIELD = 'email'
+
     def __str__(self):
         return self.name
 
