@@ -321,7 +321,23 @@ def trip(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
     
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def findTrips(request):
+    departuerStation = request.GET.get('departuerStation')
+    destinationStation = request.GET.get('destinationStation')
+    date = request.GET.get('date')
 
+    if not all([departuerStation, destinationStation, date]):
+        return Response({'error': 'Missing query parameters'}, status=400)
+
+    trips = Trips.objects.filter(
+        departuerStation=departuerStation,
+        destinationStation=destinationStation,
+        date=date
+    )
+    serializer = TripsSerializer(trips, many=True)
+    return Response(serializer.data)
     
 class FavoriteListCreateView(generics.ListCreateAPIView):
     permission_classes = [AllowAny]
@@ -372,5 +388,19 @@ class CityView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
-
+@api_view(['GET','POST'])
+@permission_classes([AllowAny])
+def booking(request):
+    if request.method == "GET":
+        booking = Booking.objects.all()
+        serializer = BookSerializer(booking, many=True)
+        return Response(serializer.data)
+    elif request.method == "POST":
+        serializer = BookSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 

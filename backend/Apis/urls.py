@@ -6,7 +6,7 @@ from . import views
 
 from django.urls import path
 from .views import *
-from .views import CompanyRegisterView, UserRegisterView, LoginView,trips,trip
+from .views import CompanyRegisterView, UserRegisterView, LoginView,trips,trip,findTrips,booking
 
 urlpatterns = [
     path('',views.home, name='home'),
@@ -26,6 +26,8 @@ urlpatterns = [
     path('favorites/', FavoriteListCreateView.as_view(), name='favorite-list-create'),
     path('user/admin/', AdminView.as_view(), name='admin-list'),
     path('user/admin/<int:pk>/', AdminView_pk.as_view(), name='admin-detail'),
+    path('find/trip/',findTrips,name='findtrips'),
+    path("booking/data/",booking,name='booking'),
 
 
 
