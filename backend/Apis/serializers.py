@@ -19,12 +19,13 @@ class UserSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             name=validated_data['name'],
             phone_number=validated_data['phone_number'],
+            user_type=validated_data.get('user_type', 'user')
         )
         user.set_password(validated_data['password'])  
         user.save()
          # إعشان لو ضفنا يوزر جديد يضيفه ف ال AllUsers
         all_users_entry = AllUsers.objects.create(
-            user_type='user',  # Only specify the user_type
+            user_type=user.user_type,  # Only specify the user_type
             email=user.email,
             name=user.name,
             phone_number=user.phone_number,
@@ -54,12 +55,13 @@ class CompanySerializer(serializers.ModelSerializer):
             commercial_register=validated_data['commercial_register'],
             work_license=validated_data['work_license'],
             certificates=validated_data['certificates'],
+            user_type=validated_data.get('user_type', 'company')
         )
         company.set_password(validated_data['password'])  # تشفير كلمة المرور
         company.save()
        
         all_users_entry = AllUsers.objects.create(
-            user_type='company',
+            user_type=company.user_type,
             email=company.email,
             name=company.name,
             phone_number=company.phone_number,

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from rest_framework import mixins,generics
+from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -47,7 +48,7 @@ class UserPermissions(permissions.BasePermission):
         elif request.method in ['POST', 'PUT', 'DELETE']:
             return request.user.has_perm('auth.change_user') or request.user.has_perm('auth.add_user')
         return False
-
+    
 class UserRegisterView(APIView):
     # permission_classes = [UserPermissions]---------------------
     permission_classes = [AllowAny]
@@ -180,11 +181,11 @@ class LoginView(APIView):
     
         if user:
             if hasattr(user, 'company'):
-                return Response({"message": "Logged in as company"}, status=status.HTTP_200_OK)
+                return Response({"message": "Logged in as company", "user_type": "company"}, status=status.HTTP_200_OK)
             elif hasattr(user, 'admin'):
-                return Response({"message": "Logged in as admin"}, status=status.HTTP_200_OK)
+                return Response({"message": "Logged in as admin", "user_type": "admin"}, status=status.HTTP_200_OK)
             else:
-                return Response({"message": "Logged in as user"}, status=status.HTTP_200_OK)
+                return Response({"message": "Logged in as user", "user_type": "user"}, status=status.HTTP_200_OK)
         
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
