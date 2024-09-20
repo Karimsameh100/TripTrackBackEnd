@@ -433,7 +433,9 @@ def booking(request):
     elif request.method == "POST":
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
-            booking = serializer.save()
+            trip_id = request.data.get('trip_id')  # Get the trip ID from the request data
+            trip = Trips.objects.get(id=trip_id)  # Get the trip instance
+            booking = serializer.save(trip=trip)
             booking.user = request.user
             booking.save()  # Save the booking instance again to update the user field
             return Response(serializer.data, status=status.HTTP_201_CREATED)

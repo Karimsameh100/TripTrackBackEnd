@@ -102,8 +102,28 @@ class Bus(models.Model):
 # from django.contrib.auth.models import User
 
 
+
+
+
+class Trips(models.Model):
+    tripNumber=models.IntegerField(unique=True)
+    date=models.DateField()
+    avilabalPlaces=models.IntegerField(null=False)
+    departuerStation=models.CharField(max_length=50,null=False)
+    destinationStation=models.CharField(max_length=50,null=False)
+    departuerTime=models.TimeField()
+    destinationTime=models.TimeField()
+    price=models.DecimalField(max_digits=10,decimal_places=2)
+    status=models.CharField(max_length=50,default="Pandding")
+    bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.status
+
+
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    trip = models.ForeignKey(Trips, on_delete=models.CASCADE,null=True, blank=True)
     date = models.DateField(auto_now_add=True)
     time = models.TimeField(auto_now=True)
     status = models.CharField(max_length=255, default='Pending')
@@ -122,25 +142,6 @@ class Booking(models.Model):
     def __str__(self):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'
     
-
-
-class Trips(models.Model):
-    tripNumber=models.IntegerField(unique=True)
-    date=models.DateField()
-    avilabalPlaces=models.IntegerField(null=False)
-    departuerStation=models.CharField(max_length=50,null=False)
-    destinationStation=models.CharField(max_length=50,null=False)
-    departuerTime=models.TimeField()
-    destinationTime=models.TimeField()
-    price=models.DecimalField(max_digits=10,decimal_places=2)
-    status=models.CharField(max_length=50,default="Pandding")
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
-    book = models.ForeignKey(Booking,on_delete=models.CASCADE,default=1)
-
-    def __str__(self):
-        return self.book.status
-
 
 class Company(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
