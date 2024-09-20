@@ -61,11 +61,12 @@ class CompanySerializer(serializers.ModelSerializer):
    
     def create(self, validated_data):
         password = validated_data.pop('password', None)
+        commercial_register = validated_data.pop('commercial_register', None)
         company = Company(
             email=validated_data['email'],
             name=validated_data['name'],
             phone_number=validated_data['phone_number'],
-            commercial_register=validated_data['commercial_register'],
+            commercial_register=commercial_register ,
             work_license=validated_data['work_license'],
             certificates=validated_data['certificates'],
             user_type=validated_data.get('user_type', 'company')

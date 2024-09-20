@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager ,Permis
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
+
+
 class UserManager(BaseUserManager):
     def create_user(self, email, name, phone_number, password=None, **extra_fields):
         if not email:
@@ -36,6 +38,12 @@ class AllUsers(AbstractBaseUser):
     confirm_password = models.CharField(max_length=255)
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
 
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+
     def __str__(self):
         return f"{self.user_type}: {self.name}"
 
@@ -57,7 +65,7 @@ class Admin(AllUsers):
     @property
     def is_authenticated(self):
         return True
-
+    
 class User(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
     is_staff = models.BooleanField(default=False)
@@ -151,11 +159,34 @@ class Company(AllUsers):
     certificates = models.FileField(upload_to='documents/')
     trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
+
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
     USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
+
+    objects = UserManager()
 
     def __str__(self):
-        return self.name
+        return self.email
 
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
 
 class Review(models.Model):
     ReviewCustomerDetails = models.ForeignKey(User, on_delete=models.CASCADE)
