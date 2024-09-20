@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.permissions import IsAuthenticated
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -16,6 +17,12 @@ from rest_framework.views import APIView
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, BasePermission, AllowAny
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework import permissions
+from django.contrib.auth.decorators import login_required
+from rest_framework_simplejwt.authentication import JWTAuthentication
+import jwt
+from django.conf import settings
+
+
 
 from .models import *
 from .serializers import *
@@ -206,7 +213,8 @@ class LoginView(APIView):
                 "message": "Login successful",
                 "user_type": "company" if hasattr(user, 'company') else "admin" if hasattr(user, 'admin') else "user",
                 "user_info": user_data,
-                "token": access_token
+                "token": access_token,
+                "username": user_data.get('username') 
             }, status=status.HTTP_200_OK)
         
         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -407,8 +415,9 @@ class CityView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 
-@api_view(['GET','POST'])
-@permission_classes([AllowAny])
+
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def booking(request):
     if request.method == "GET":
         booking = Booking.objects.all()
@@ -417,9 +426,47 @@ def booking(request):
     elif request.method == "POST":
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            booking = serializer.save()
+            booking.user = request.user
+            booking.save()  # Save the booking instance again to update the user field
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
+import jwt
+from django.conf import settings
+from rest_framework.authentication import BaseAuthentication
+class JWTAuthentication(BaseAuthentication):
+    def get_user_id_from_token(self, token):
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            return payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            return None
+
+    def authenticate(self, request):
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            user_id = self.get_user_id_from_token(token)
+            if user_id:
+                user = User.objects.get(id=user_id)
+                return (user, token)
+            else:
+                return None
+        else:
+            return None
+    
+class CurrentUserView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        user, token = JWTAuthentication().authenticate(request)
+        if user:
+            return Response({'user_id': user.id})
+        else:
+            return Response({'error': 'Invalid authentication token'}, status=401)

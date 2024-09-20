@@ -28,6 +28,7 @@ urlpatterns = [
     path('user/admin/<int:pk>/', AdminView_pk.as_view(), name='admin-detail'),
     path('find/trip/',findTrips,name='findtrips'),
     path("booking/data/",booking,name='booking'),
+    path('currant-user/',views.CurrentUserView.as_view(),name='currentuser')
 
 
 
