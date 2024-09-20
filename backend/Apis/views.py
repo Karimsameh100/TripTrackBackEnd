@@ -38,14 +38,21 @@ class CompanyPermissions(permissions.BasePermission):
         return False
 
 class CompanyRegisterView(APIView):
-    permission_classes=[CompanyPermissions]
+    #permission_classes=[CompanyPermissions]
+    permission_classes = [AllowAny]
     def get(self,request):
         company=Company.objects.all()
         serializer=CompanySerializer(company,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        return Response(serializer.data)
+    
     def post(self, request):
         serializer = CompanySerializer(data=request.data)
         if serializer.is_valid():
+            # Check if email already exists
+            email = serializer.validated_data.get('email')
+            if AllUsers.objects.filter(email=email).exists():
+                return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            
             serializer.save()
             return Response({"message": "Company registered successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
