@@ -123,7 +123,7 @@ class Trips(models.Model):
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(AllUsers, on_delete=models.CASCADE, null=True, blank=True)
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE,null=True, blank=True)
     date = models.DateField(auto_now_add=True)
     time = models.TimeField(auto_now=True)
@@ -132,13 +132,15 @@ class Booking(models.Model):
     totalFare = models.FloatField()
     pickupLocation = models.CharField(max_length=255)
     dropLocation = models.CharField(max_length=255)
+    # bookingNum = models.AutoField(null=True,blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.user:
-            from django.contrib.auth.models import AnonymousUser
-            if not isinstance(self.request.user, AnonymousUser):
-                self.user_id = self.request.user.id
-        super().save(*args, **kwargs)
+       if not self.user:
+          from .models import AllUsers
+          from django.contrib.auth.models import AnonymousUser
+          if not isinstance(self.request.user, AnonymousUser):
+            self.user_id = self.request.user.id
+       super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'
@@ -173,3 +175,16 @@ class City(models.Model):
 
     def __str__(self):
         return self.city
+    
+
+class Payment(models.Model):
+    user = models.ForeignKey(AllUsers, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
+    payment_method = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=255,default="Success")
+    booking = models.ForeignKey(Booking,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Payment for booking {self.booking.id} by {self.user.name}'
