@@ -28,7 +28,10 @@ urlpatterns = [
     path('user/admin/<int:pk>/', AdminView_pk.as_view(), name='admin-detail'),
     path('find/trip/',findTrips,name='findtrips'),
     path("booking/data/",booking,name='booking'),
-    path('currant-user/',views.CurrentUserView.as_view(),name='currentuser')
+    path('currant-user/',views.CurrentUserView.as_view(),name='currentuser'),
+    path('create-payment/', views.CreatePaymentView.as_view(), name='create_payment'),
+    path('payments/', PaymentView.as_view()),
+    path('payments/<int:pk>/', SinglePaymentView.as_view()),
 
 
 

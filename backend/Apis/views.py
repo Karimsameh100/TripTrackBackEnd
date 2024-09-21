@@ -439,11 +439,11 @@ def booking(request):
     elif request.method == "POST":
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
-            trip_id = request.data.get('trip_id')  # Get the trip ID from the request data
-            trip = Trips.objects.get(id=trip_id)  # Get the trip instance
+            trip_id = request.data.get('trip_id') 
+            trip = Trips.objects.get(id=trip_id)  
             booking = serializer.save(trip=trip)
             booking.user = request.user
-            booking.save()  # Save the booking instance again to update the user field
+            booking.save() 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -485,3 +485,88 @@ class CurrentUserView(APIView):
             return Response({'user_id': user.id})
         else:
             return Response({'error': 'Invalid authentication token'}, status=401)
+        
+
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from paypalrestsdk import Payment
+
+class CreatePaymentView(APIView):
+    def post(self, request):
+        # Get the payment amount and currency from the request
+        amount = request.data.get('amount')
+        currency = request.data.get('currency')
+
+        # Create a new payment using the paypalrestsdk library
+        payment = Payment({
+            'intent': 'sale',
+            'payer': {
+                'payment_method': 'paypal'
+            },
+            'transactions': [
+                {
+                    'amount': {
+                        'total': amount,
+                        'currency': currency
+                    }
+                }
+            ]
+        })
+
+        if payment.create():
+            return Response({
+                'payment_id': payment.id,
+                'approval_url': payment.links[1].href
+            })
+        else:
+            return Response({'error': 'Error creating payment'}, status=400)
+        
+
+class PaymentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        payments = Payment.objects.all()
+        serializer = PaymentSerializer(payments, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = PaymentSerializer(data=request.data)
+        if serializer.is_valid():
+           trip_id = request.data.get('trip_id')
+           booking_id = request.data.get('booking_id')
+           trip = Trips.objects.get(id=trip_id)
+           booking = Booking.objects.get(id=booking_id)
+           payment = serializer.save(trip=trip, booking=booking, user=request.user)
+           return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SinglePaymentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return Payment.objects.get(id=pk)
+        except Payment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, pk):
+        payment = self.get_object(pk)
+        serializer = PaymentSerializer(payment)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        payment = self.get_object(pk)
+        serializer = PaymentSerializer(payment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        payment = self.get_object(pk)
+        payment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
