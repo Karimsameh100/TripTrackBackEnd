@@ -37,6 +37,9 @@ class AllUsers(AbstractBaseUser):
     password = models.CharField(max_length=255)
     confirm_password = models.CharField(max_length=255)
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+    """  is_staff = models.BooleanField(default=False) """
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -46,30 +49,24 @@ class AllUsers(AbstractBaseUser):
 
     def __str__(self):
         return f"{self.user_type}: {self.name}"
-
-class Admin(AllUsers):
-    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
-    is_staff = models.BooleanField(default=True)
-    is_superuser = models.BooleanField(default=True)
-
+    
     def has_perm(self, perm, obj=None):
+        """Does the user have a specific permission?"""
         return self.is_superuser
 
     def has_module_perms(self, app_label):
+        """Does the user have permissions to view the app `app_label`?"""
         return self.is_superuser
-    
-    @property
-    def is_anonymous(self):
-        return False
 
-    @property
-    def is_authenticated(self):
-        return True
+
+class Admin(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+
+    def __str__(self):
+        return self.email
     
 class User(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
@@ -78,23 +75,6 @@ class User(AllUsers):
 
     def __str__(self):
         return self.email
-
-    def has_perm(self, perm, obj=None):
-        return self.is_superuser
-
-    def has_module_perms(self, app_label):
-        return self.is_superuser
-
-    @property
-    def is_anonymous(self):
-        return False
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    def has_module_perms(self, app_label):
-        return self.is_superuser
 
 
 class Bus(models.Model):
@@ -105,12 +85,23 @@ class Bus(models.Model):
     def __str__(self):
         return self.busNumber
 
+class Company(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+    about = models.TextField(default="Default about information")
+    commercial_register = models.FileField(upload_to='documents/')
+    work_license = models.FileField(upload_to='documents/')
+    certificates = models.FileField(upload_to='documents/')
+    trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
 
 
-# from django.contrib.auth.models import User
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
 
+    objects = UserManager()
 
-
+    def __str__(self):
+        return self.email
 
 
 class Trips(models.Model):
@@ -124,9 +115,11 @@ class Trips(models.Model):
     price=models.DecimalField(max_digits=10,decimal_places=2)
     status=models.CharField(max_length=50,default="Pandding")
     bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_trips", default=135)
 
     def __str__(self):
         return self.status
+
 
 
 class Booking(models.Model):
@@ -149,44 +142,7 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'
-    
 
-class Company(AllUsers):
-    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
-    about = models.TextField(default="Default about information")
-    commercial_register = models.FileField(upload_to='documents/')
-    work_license = models.FileField(upload_to='documents/')
-    certificates = models.FileField(upload_to='documents/')
-    trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
-    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
-
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
-
-    objects = UserManager()
-
-    def __str__(self):
-        return self.email
-
-    def has_perm(self, perm, obj=None):
-        return self.is_superuser
-
-    def has_module_perms(self, app_label):
-        return self.is_superuser
-
-    @property
-    def is_anonymous(self):
-        return False
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    def has_module_perms(self, app_label):
-        return self.is_superuser
 
 class Review(models.Model):
     ReviewCustomerDetails = models.ForeignKey(User, on_delete=models.CASCADE)

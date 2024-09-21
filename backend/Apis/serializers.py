@@ -43,7 +43,79 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ReviewSerializer(serializers.ModelSerializer):
+    ReviewCustomerDetails = UserSerializer(read_only=True)
+    class Meta:
+        model = Review
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        return Review.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.Review = validated_data.get('Review', instance.Review)
+        instance.ReviewCustomerRate = validated_data.get('ReviewCustomerRate', instance.ReviewCustomerRate)
+        instance.save()
+        return instance
+    
+    
+    
+class AdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Admin
+        fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'confirm_password': {'write_only': True}
+        }
+
+    def validate(self, data):
+        if 'confirm_password' in data and data.get('password') != data.get('confirm_password'):
+            raise serializers.ValidationError("Passwords must match.")
+        return data
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        admin = Admin( email=validated_data['email'],
+            name=validated_data['name'],
+            phone_number=validated_data['phone_number'],
+            user_type=validated_data.get('user_type', 'admin')
+        )
+        if password:
+            admin.set_password(password)
+        admin.save()
+        return admin
+
+class AllUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllUsers
+        fields = '__all__'
+
+    
+    
+class userNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["email"]
+    
+
+        
+class TripsSerializer(serializers.ModelSerializer):
+    users=userNameSerializer(source="user" , read_only=True)
+    class Meta:
+        model = Trips
+        fields = '__all__'  # Include all fields of the Trips model
+
+    def create(self, validated_data):
+        # Assign the trip to the company from the context (passed through views)
+        company = self.context['company']
+        validated_data['bus'] = company.bus  # Assign the bus from the company
+        trip = Trips.objects.create(**validated_data)
+        trip.companies.add(company)  # Add the company to the trip's related companies
+        return trip
+
 class CompanySerializer(serializers.ModelSerializer):
+    company_trips = TripsSerializer(many=True, read_only=True) 
     class Meta:
         model = Company
         fields = '__all__'
@@ -76,48 +148,6 @@ class CompanySerializer(serializers.ModelSerializer):
         company.save()
         return company
        
-
-class ReviewSerializer(serializers.ModelSerializer):
-    ReviewCustomerDetails = UserSerializer(read_only=True)
-    class Meta:
-        model = Review
-        fields = '__all__'
-    
-    def create(self, validated_data):
-        return Review.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.Review = validated_data.get('Review', instance.Review)
-        instance.ReviewCustomerRate = validated_data.get('ReviewCustomerRate', instance.ReviewCustomerRate)
-        instance.save()
-        return instance
-    
-    
-    
-class AdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Admin
-        fields = '__all__'
-
-class AllUsersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AllUsers
-        fields = '__all__'
-
-    
-    
-class userNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["email"]
-    
-
-        
-class TripsSerializer(serializers.ModelSerializer):
-    users=userNameSerializer(source="user" , read_only=True)
-    class Meta:
-        model = Trips
-        fields = '__all__'  # Include all fields of the Trips model
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:

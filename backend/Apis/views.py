@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import IsAuthenticated
+from itertools import chain
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -124,7 +125,7 @@ class AdminPermissions(permissions.BasePermission):
         return False
     
 class AdminView(APIView):
-    permission_classes = [AdminPermissions]
+    permission_classes = [AllowAny]
     queryset = Admin.objects.all()
     serializer_class = AdminSerializer
 
@@ -141,7 +142,7 @@ class AdminView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AdminView_pk(APIView):
-    permission_classes = [AdminPermissions]
+    permission_classes = [AllowAny]
     queryset = Admin.objects.all()
     serializer_class = AdminSerializer
 
@@ -171,8 +172,27 @@ class AdminView_pk(APIView):
 # ///////////////////////////////////////////////////////
 #mixins get,post
 class Mixinuser_list(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPIView):
-    queryset=User.objects.all()
-    serializer_class=UserSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user_type = self.request.query_params.get('user_type', None)
+        if user_type == 'company':
+            return Company.objects.all()
+        elif user_type == 'admin':
+            return Admin.objects.all()
+        elif user_type == 'user':
+            return User.objects.all()
+        # Return all users (User, Company, Admin) by combining querysets
+        return list(chain(User.objects.all(), Company.objects.all(), Admin.objects.all()))
+
+    def get_serializer_class(self):
+        user_type = self.request.query_params.get('user_type', None)
+        if user_type == 'company':
+            return CompanySerializer
+        elif user_type == 'admin':
+            return AdminSerializer
+        return UserSerializer  # Default case for regular users
+    
     def get(self,request):
         return self.list(request)
     
@@ -180,17 +200,38 @@ class Mixinuser_list(mixins.ListModelMixin,mixins.CreateModelMixin,generics.Gene
         return self.create(request)
 
 # mixin_pk get,put,delete 
-class mixinuser_pk(mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin,generics.GenericAPIView):
-    queryset=User.objects.all()
-    serializer_class=UserSerializer
-    def get(self,request,pk):
-        return self.retrieve(request)
-    
-    def put(self,request,pk):
-        return self.update(request)
-    
-    def delete(self,request,pk):
-        return self.destroy(request)
+class mixinuser_pk(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def get_object(self):
+        user_type = self.request.query_params.get('user_type', None)
+        pk = self.kwargs.get('pk')
+        
+        if user_type == 'company':
+            return Company.objects.get(pk=pk)
+        elif user_type == 'admin':
+            return Admin.objects.get(pk=pk)
+        return User.objects.get(pk=pk)  # Default case for regular users
+
+    def get_serializer_class(self):
+        user_type = self.request.query_params.get('user_type', None)
+        if user_type == 'company':
+            return CompanySerializer
+        elif user_type == 'admin':
+            return AdminSerializer
+        return UserSerializer  # Default case for regular users
+
+    def get(self, request, pk, *args, **kwargs):
+        company = self.get_object()
+        serializer = self.get_serializer_class()(company)
+        return Response(serializer.data)
+
+    def put(self, request, pk, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, pk, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
 # /////////////////////////////////////
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -330,7 +371,7 @@ def trips(request):
         serializer = TripsSerializer(trips, many=True)
         return Response(serializer.data)
     elif request.method == "POST":
-        serializer = TripsSerializer(data=request.data)
+        serializer = TripsSerializer(data=request.data, context={'company': request.user.company})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
