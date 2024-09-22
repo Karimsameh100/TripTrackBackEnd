@@ -37,9 +37,9 @@ class AllUsers(AbstractBaseUser):
     password = models.CharField(max_length=255)
     confirm_password = models.CharField(max_length=255)
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
-    """  is_staff = models.BooleanField(default=False) """
-    is_superuser = models.BooleanField(default=False)
+
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()
 
@@ -58,9 +58,15 @@ class AllUsers(AbstractBaseUser):
         """Does the user have permissions to view the app `app_label`?"""
         return self.is_superuser
 
+    @property
+    def is_staff_member(self):
+        """Is the user a member of staff?"""
+        return self.is_staff
 
 class Admin(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+
+    objects = UserManager()
 
     def __str__(self):
         return self.email
@@ -123,7 +129,7 @@ class Trips(models.Model):
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(AllUsers, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     trip = models.ForeignKey(Trips, on_delete=models.CASCADE,null=True, blank=True)
     date = models.DateField(auto_now_add=True)
     time = models.TimeField(auto_now=True)
@@ -132,15 +138,13 @@ class Booking(models.Model):
     totalFare = models.FloatField()
     pickupLocation = models.CharField(max_length=255)
     dropLocation = models.CharField(max_length=255)
-    # bookingNum = models.AutoField(null=True,blank=True)
 
     def save(self, *args, **kwargs):
-       if not self.user:
-          from .models import AllUsers
-          from django.contrib.auth.models import AnonymousUser
-          if not isinstance(self.request.user, AnonymousUser):
-            self.user_id = self.request.user.id
-       super().save(*args, **kwargs)
+        if not self.user:
+            from django.contrib.auth.models import AnonymousUser
+            if not isinstance(self.request.user, AnonymousUser):
+                self.user_id = self.request.user.id
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'

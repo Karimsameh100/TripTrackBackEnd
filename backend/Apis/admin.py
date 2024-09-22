@@ -9,6 +9,7 @@ class AdminAdmin(admin.ModelAdmin):
     list_display = ['email', 'is_staff', 'is_superuser']
 
 
+admin.site.register(AllUsers)
 admin.site.register(User)
 admin.site.register(Company)
 
