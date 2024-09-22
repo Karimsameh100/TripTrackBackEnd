@@ -16,12 +16,13 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, phone_number, password=None, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):
+        name = extra_fields.get('name', 'Admin')
+        phone_number = extra_fields.get('phone_number', '1234567890')
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
         return self.create_user(email, name, phone_number, password, **extra_fields)
-
 
 class AllUsers(AbstractBaseUser):
     USER_TYPE_CHOICES = (
@@ -37,6 +38,8 @@ class AllUsers(AbstractBaseUser):
     password = models.CharField(max_length=255)
     confirm_password = models.CharField(max_length=255)
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -46,10 +49,19 @@ class AllUsers(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
 
     def __str__(self):
         return f"{self.user_type}: {self.name}"
-    
+
+class Admin(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+   
+
     def has_perm(self, perm, obj=None):
         """Does the user have a specific permission?"""
         return self.is_superuser
@@ -73,6 +85,7 @@ class Admin(AllUsers):
     
 class User(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+   
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
@@ -149,6 +162,42 @@ class Booking(models.Model):
     def __str__(self):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'
 
+class Company(AllUsers):
+    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+    about = models.TextField(default="Default about information")
+    commercial_register = models.FileField(upload_to='documents/')
+    work_license = models.FileField(upload_to='documents/')
+    certificates = models.FileField(upload_to='documents/')
+    trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
+    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
+
+    # is_staff = models.BooleanField(default=False)
+    # is_superuser = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
 
 class Review(models.Model):
     ReviewCustomerDetails = models.ForeignKey(User, on_delete=models.CASCADE)
