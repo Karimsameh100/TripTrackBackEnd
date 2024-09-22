@@ -75,14 +75,7 @@ class Admin(AllUsers):
         """Is the user a member of staff?"""
         return self.is_staff
 
-class Admin(AllUsers):
-    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
 
-    objects = UserManager()
-
-    def __str__(self):
-        return self.email
-    
 class User(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
    
@@ -104,15 +97,18 @@ class Bus(models.Model):
     def __str__(self):
         return self.busNumber
 
+
+
 class Company(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
     about = models.TextField(default="Default about information")
     commercial_register = models.FileField(upload_to='documents/')
     work_license = models.FileField(upload_to='documents/')
     certificates = models.FileField(upload_to='documents/')
-    trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
 
+    # is_staff = models.BooleanField(default=False)
+    # is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
@@ -121,6 +117,24 @@ class Company(AllUsers):
 
     def __str__(self):
         return self.email
+
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+
 
 
 class Trips(models.Model):
@@ -162,42 +176,6 @@ class Booking(models.Model):
     def __str__(self):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'
 
-class Company(AllUsers):
-    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
-    about = models.TextField(default="Default about information")
-    commercial_register = models.FileField(upload_to='documents/')
-    work_license = models.FileField(upload_to='documents/')
-    certificates = models.FileField(upload_to='documents/')
-    trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
-    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
-
-    # is_staff = models.BooleanField(default=False)
-    # is_superuser = models.BooleanField(default=False)
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
-
-    objects = UserManager()
-
-    def __str__(self):
-        return self.email
-
-    def has_perm(self, perm, obj=None):
-        return self.is_superuser
-
-    def has_module_perms(self, app_label):
-        return self.is_superuser
-
-    @property
-    def is_anonymous(self):
-        return False
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    def has_module_perms(self, app_label):
-        return self.is_superuser
 
 class Review(models.Model):
     ReviewCustomerDetails = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -208,7 +186,7 @@ class Review(models.Model):
 
     def __str__(self):
         return f'Review by {self.ReviewCustomerDetails.email} with rate {self.ReviewCustomerRate}'
-3    
+  
     
     
 class Favorite(models.Model):
@@ -241,3 +219,26 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'Payment for booking {self.booking.id} by {self.user.name}'
+    
+
+
+
+
+
+# class Company(AllUsers):
+#     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+#     about = models.TextField(default="Default about information")
+#     commercial_register = models.FileField(upload_to='documents/')
+#     work_license = models.FileField(upload_to='documents/')
+#     certificates = models.FileField(upload_to='documents/')
+#     trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
+#     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
+
+
+#     USERNAME_FIELD = 'email'
+#     REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
+
+#     objects = UserManager()
+
+#     def __str__(self):
+#         return self.email
