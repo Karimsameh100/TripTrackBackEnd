@@ -141,7 +141,7 @@ class CompanySerializer(serializers.ModelSerializer):
             commercial_register=commercial_register ,
             work_license=validated_data['work_license'],
             certificates=validated_data['certificates'],
-            user_type=validated_data.get('user_type', 'company')
+            user_type=validated_data.get('user_type', 'company'),
         )
         if password:
             company.set_password(password)
