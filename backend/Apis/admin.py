@@ -1,13 +1,12 @@
 from django.contrib import admin
 from .models import *
-# Register your models here.
 
+# Register your models here.
 
 # Register the Admin model for admin interface
 @admin.register(Admin)
 class AdminAdmin(admin.ModelAdmin):
     list_display = ['email', 'is_staff', 'is_superuser']
-
 
 admin.site.register(AllUsers)
 admin.site.register(User)
@@ -20,7 +19,7 @@ admin.site.register(Booking)
 admin.site.register(Favorite)
 admin.site.register(City)
 
-
-
-
-
+# Register the LogEntry model
+@admin.register(LogEntry)
+class LogEntryAdmin(admin.ModelAdmin):
+    list_display = ['user', 'action_time', 'change_message']

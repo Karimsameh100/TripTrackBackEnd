@@ -41,6 +41,9 @@ class AllUsers(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -72,12 +75,6 @@ class Admin(AllUsers):
         """Is the user a member of staff?"""
         return self.is_staff
 
-    @classmethod
-    def create_superuser(cls, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return cls.objects.create_user(email, password, **extra_fields)
-
 
 class User(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
@@ -91,12 +88,6 @@ class User(AllUsers):
     def __str__(self):
         return self.email
 
-from django.db import models
-from django.contrib.admin.models import LogEntry as BaseLogEntry
-
-class LogEntry(BaseLogEntry):
-    admin_user = models.ForeignKey('Apis.Admin', on_delete=models.CASCADE, related_name='log_entries')
-
 
 class Bus(models.Model):
     busNumber = models.CharField(max_length=255)
@@ -108,26 +99,7 @@ class Bus(models.Model):
 
 
 
-
 class Company(AllUsers):
-    allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
-    about = models.TextField(default="Default about information")
-    commercial_register = models.FileField(upload_to='documents/')
-    work_license = models.FileField(upload_to='documents/')
-    certificates = models.FileField(upload_to='documents/')
-    bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
-
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
-
-    objects = UserManager()
-
-    def __str__(self):
-         return self.email
-
-
-""" class Company(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
     about = models.TextField(default="Default about information")
     commercial_register = models.FileField(upload_to='documents/')
@@ -162,7 +134,7 @@ class Company(AllUsers):
 
     def has_module_perms(self, app_label):
         return self.is_superuser
- """
+
 
 
 class Trips(models.Model):
@@ -251,3 +223,22 @@ class Payment(models.Model):
 
 
 
+
+
+# class Company(AllUsers):
+#     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
+#     about = models.TextField(default="Default about information")
+#     commercial_register = models.FileField(upload_to='documents/')
+#     work_license = models.FileField(upload_to='documents/')
+#     certificates = models.FileField(upload_to='documents/')
+#     trips = models.ManyToManyField('Trips', related_name='companies', blank=True)
+#     bus = models.ForeignKey(Bus, on_delete=models.CASCADE, default=1)
+
+
+#     USERNAME_FIELD = 'email'
+#     REQUIRED_FIELDS = ['name', 'phone_number', 'confirm_password']
+
+#     objects = UserManager()
+
+#     def __str__(self):
+#         return self.email
