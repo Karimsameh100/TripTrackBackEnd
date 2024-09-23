@@ -41,6 +41,9 @@ class AllUsers(AbstractBaseUser):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
@@ -72,12 +75,6 @@ class Admin(AllUsers):
         """Is the user a member of staff?"""
         return self.is_staff
 
-    @classmethod
-    def create_superuser(cls, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        return cls.objects.create_user(email, password, **extra_fields)
-
 
 class User(AllUsers):
     allusers_ptr = models.OneToOneField(AllUsers,on_delete=models.CASCADE,parent_link=True,)
@@ -90,12 +87,6 @@ class User(AllUsers):
 
     def __str__(self):
         return self.email
-
-from django.db import models
-from django.contrib.admin.models import LogEntry as BaseLogEntry
-
-class LogEntry(BaseLogEntry):
-    admin_user = models.ForeignKey('Apis.Admin', on_delete=models.CASCADE, related_name='log_entries')
 
 
 class Bus(models.Model):
