@@ -483,7 +483,7 @@ def booking(request):
             trip_id = request.data.get('trip_id') 
             trip = Trips.objects.get(id=trip_id)  
             booking = serializer.save(trip=trip)
-            booking.user = request.user
+            booking.user = request.user.user
             booking.save() 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
