@@ -393,8 +393,8 @@ def trip(request, pk):
     elif request.method == "PUT":
         serializer = TripsSerializer(trip, data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data , status= status.HTTP_205_RESET_CONTENT)
+         updated_trip = serializer.save()  # Save the updated trip
+         return Response(TripsSerializer(updated_trip).data, status=status.HTTP_200_OK)  # Return the updated trip
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == "DELETE":

@@ -109,9 +109,9 @@ class TripsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Assign the trip to the company from the context (passed through views)
         company = self.context['company']
+        validated_data['company'] = company
         validated_data['bus'] = company.bus  # Assign the bus from the company
         trip = Trips.objects.create(**validated_data)
-        trip.companies.add(company)  # Add the company to the trip's related companies
         return trip
 
 class CompanySerializer(serializers.ModelSerializer):

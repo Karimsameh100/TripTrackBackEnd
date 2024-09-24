@@ -176,7 +176,7 @@ class Trips(models.Model):
     price=models.DecimalField(max_digits=10,decimal_places=2)
     status=models.CharField(max_length=50,default="Pandding")
     bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_trips", default=135)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_trips")
 
     def __str__(self):
         return self.status
