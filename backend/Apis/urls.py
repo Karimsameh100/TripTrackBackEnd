@@ -32,6 +32,7 @@ urlpatterns = [
     path('create-payment/', views.CreatePaymentView.as_view(), name='create_payment'),
     path('payments/', PaymentView.as_view()),
     path('payments/<int:pk>/', SinglePaymentView.as_view()),
+    path('company/<int:pk>/', CompanyDetailView.as_view()),
 
 
 
