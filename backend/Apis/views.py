@@ -7,6 +7,11 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import IsAuthenticated
 from itertools import chain
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
+import smtplib
+from email.mime.text import MIMEText
+import ssl
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -21,7 +26,7 @@ from rest_framework import permissions
 from django.contrib.auth.decorators import login_required
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import jwt
-from django.conf import settings
+
 
 
 
@@ -488,10 +493,57 @@ def booking(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
 
-import jwt
-from django.conf import settings
+
+@api_view(['PATCH'])
+@permission_classes([AllowAny])
+def update_booking_status(request, pk):
+    try:
+        booking = Booking.objects.get(pk=pk)
+    except Booking.DoesNotExist:
+        return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if 'status' not in request.data:
+        return Response({'error': 'Status field is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    status_data = {'status': request.data['status']}
+    serializer = BookSerializer(booking, data=status_data, partial=True)
+    
+    if serializer.is_valid():
+        serializer.save()
+
+        # Send email based on the status
+        if status_data['status'] == 'Accepted':
+            subject = "Booking Confirmed"
+            body = f"Dear {booking.user.name}, your booking for trip {booking.trip} has been confirmed. Please proceed to payment here: [Payment Link]."
+            send_email(subject, body, booking.user.email)
+        elif status_data['status'] == 'Rejected':
+            subject = "Booking Rejected"
+            body = f"Dear {booking.user.name}, your booking for trip {booking.trip} has been rejected. Please choose another time."
+            send_email(subject, body, booking.user.email)
+            
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)       
+
+
+def send_email(subject, body, recipient_email):
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = settings.EMAIL_HOST_USER
+    msg['To'] = recipient_email
+
+    try:
+        # Create an SSL context to ignore certificate verification (not recommended for production)
+        context = ssl._create_unverified_context()
+
+        with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT) as server:
+            server.starttls(context=context)  # Upgrade the connection to secure
+            server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+            server.send_message(msg)
+
+    except Exception as e:
+        print(f"Error sending email: {e}")
+    
 from rest_framework.authentication import BaseAuthentication
 class JWTAuthentication(BaseAuthentication):
     def get_user_id_from_token(self, token):

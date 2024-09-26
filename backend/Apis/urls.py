@@ -2,11 +2,7 @@
 from django.contrib import admin
 from django.urls import path,include
 from . import views
-
-
-from django.urls import path
 from .views import *
-from .views import CompanyRegisterView, UserRegisterView, LoginView,trips,trip,findTrips,booking
 
 urlpatterns = [
     path('',views.home, name='home'),
@@ -28,6 +24,7 @@ urlpatterns = [
     path('user/admin/<int:pk>/', AdminView_pk.as_view(), name='admin-detail'),
     path('find/trip/',findTrips,name='findtrips'),
     path("booking/data/",booking,name='booking'),
+    path('booking/<int:pk>/update-status/', update_booking_status, name='update-booking-status'),
     path('currant-user/',views.CurrentUserView.as_view(),name='currentuser'),
     path('create-payment/', views.CreatePaymentView.as_view(), name='create_payment'),
     path('payments/', PaymentView.as_view()),

@@ -224,3 +224,12 @@ SIMPLE_JWT = {
     'VERIFYING_KEY': None,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'triptrack24@gmail.com'  
+EMAIL_HOST_PASSWORD = 'ktbu btix zhja zpxtç' 
+DEFAULT_FROM_EMAIL = 'TripTrack@gmail.com'
