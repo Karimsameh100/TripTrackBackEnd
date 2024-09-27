@@ -176,7 +176,7 @@ class Trips(models.Model):
     price=models.DecimalField(max_digits=10,decimal_places=2)
     status=models.CharField(max_length=50,default="Pandding")
     bus = models.ForeignKey(Bus,on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_trips")
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="company_trips", default=135)
 
     def __str__(self):
         return self.status
@@ -205,14 +205,6 @@ class Booking(models.Model):
         return f"Booking for {self.user.name} on {self.date}" if self.user else 'No user'
 
 
-
-    
-    
-class Favorite(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    trip_id = models.ForeignKey(Trips, on_delete=models.CASCADE, related_name='favorites')
-    
-
 class Review(models.Model):
     ReviewCustomerDetails = models.ForeignKey(User, on_delete=models.CASCADE)
     Review = models.TextField()
@@ -223,6 +215,13 @@ class Review(models.Model):
     def __str__(self):
         return f'Review by {self.ReviewCustomerDetails.email} with rate {self.ReviewCustomerRate}'
   
+    
+    
+class Favorite(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    trip_id = models.ForeignKey(Trips, on_delete=models.CASCADE, related_name='favorites')
+    
+
 
 
 class City(models.Model):
