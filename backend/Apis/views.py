@@ -606,45 +606,49 @@ class CurrentUserView(APIView):
     def get(self, request):
         user, token = JWTAuthentication().authenticate(request)
         if user:
-            return Response({'user_id': user.id})
+             return Response({
+                'user_id': user.id,
+                'email': user.email,
+                'username': user.name,
+            })
         else:
             return Response({'error': 'Invalid authentication token'}, status=401)
         
 
 
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from paypalrestsdk import Payment
+# from rest_framework.response import Response
+# from rest_framework.views import APIView
+# from paypalrestsdk import Payment
 
-class CreatePaymentView(APIView):
-    def post(self, request):
-        # Get the payment amount and currency from the request
-        amount = request.data.get('amount')
-        currency = request.data.get('currency')
+# class CreatePaymentView(APIView):
+#     def post(self, request):
+#         # Get the payment amount and currency from the request
+#         amount = request.data.get('amount')
+#         currency = request.data.get('currency')
 
-        # Create a new payment using the paypalrestsdk library
-        payment = Payment({
-            'intent': 'sale',
-            'payer': {
-                'payment_method': 'paypal'
-            },
-            'transactions': [
-                {
-                    'amount': {
-                        'total': amount,
-                        'currency': currency
-                    }
-                }
-            ]
-        })
+#         # Create a new payment using the paypalrestsdk library
+#         payment = Payment({
+#             'intent': 'sale',
+#             'payer': {
+#                 'payment_method': 'paypal'
+#             },
+#             'transactions': [
+#                 {
+#                     'amount': {
+#                         'total': amount,
+#                         'currency': currency
+#                     }
+#                 }
+#             ]
+#         })
 
-        if payment.create():
-            return Response({
-                'payment_id': payment.id,
-                'approval_url': payment.links[1].href
-            })
-        else:
-            return Response({'error': 'Error creating payment'}, status=400)
+#         if payment.create():
+#             return Response({
+#                 'payment_id': payment.id,
+#                 'approval_url': payment.links[1].href
+#             })
+#         else:
+#             return Response({'error': 'Error creating payment'}, status=400)
         
 
 class PaymentView(APIView):
