@@ -193,6 +193,8 @@ class Booking(models.Model):
     totalFare = models.FloatField()
     pickupLocation = models.CharField(max_length=255)
     dropLocation = models.CharField(max_length=255)
+    # paymentMethod = models.CharField(max_length=100,default="payOnline")
+    # amount= models.FloatField(default=totalFare)
 
     def save(self, *args, **kwargs):
         if not self.user:
