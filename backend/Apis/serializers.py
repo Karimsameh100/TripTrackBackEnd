@@ -35,6 +35,10 @@ class UserSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.user_type = validated_data.get('user_type', instance.user_type)
+
+        image = validated_data.get('image', None)  # Check if an image is provided
+        if image:
+            instance.image = image
         
         if password:
             instance.set_password(password)
