@@ -546,7 +546,7 @@ def update_booking_status(request, pk):
         # Send email based on the status
         if status_data['status'] == 'Accepted':
             subject = "Booking Confirmed"
-            body = f"Dear {booking.user.name}, your booking for trip {booking.trip} has been confirmed. Please proceed to payment here: [Payment Link]."
+            body = f"Dear {booking.user.name}, your booking for trip {booking.trip} has been confirmed. Please proceed to payment from accepted trips in your profile."
             send_email(subject, body, booking.user.email)
         elif status_data['status'] == 'Rejected':
             subject = "Booking Rejected"
