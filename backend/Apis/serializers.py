@@ -171,26 +171,27 @@ class busSeliarizer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-  
+    trip = TripsSerializer()
+
     class Meta:
         model = Favorite
-        fields = ["user_id", "trip_id"]
+        fields = ["id", "trip"]
         extra_kwargs = {
-            "user_id": {"required": True},
-            "trip_id": {"required": True},
+            "id": {"required": True},
+            "trip": {"required": True},
         }
 
     def to_representation(self, instance):
         return {
             "favorite_id": instance.id,
-            "user_name": instance.user_id.name,
-            "trip_date": instance.trip_id.date,
-            "trip_avilable_places": instance.trip_id.avilabalPlaces,
-            "trip_price": instance.trip_id.price,
-            "trip_departure_time": instance.trip_id.departuerTime,
-            "trip_departure_station": instance.trip_id.departuerStation,
-            "trip_destination_Station": instance.trip_id.destinationStation,
-            "trip_destination_Time": instance.trip_id.destinationTime,
+            "user_name": instance.id.name,
+            "trip_date": instance.trip.date,
+            "trip_avilable_places": instance.trip.avilabalPlaces,
+            "trip_price": instance.trip.price,
+            "trip_departure_time": instance.trip.departuerTime,
+            "trip_departure_station": instance.trip.departuerStation,
+            "trip_destination_Station": instance.trip.destinationStation,
+            "trip_destination_Time": instance.trip.destinationTime,
         }
 
 

@@ -471,11 +471,21 @@ def findTrips(request):
     serializer = TripsSerializer(trips, many=True)
     return Response(serializer.data)
     
-class FavoriteListCreateView(generics.ListCreateAPIView):
-    permission_classes = [AllowAny]
-    queryset = Favorite.objects.all()
+class AddFavoriteView(generics.CreateAPIView):
     serializer_class = FavoriteSerializer
-    
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        trip_id = self.request.data.get('trip_id')
+        trip = Trips.objects.get(id=trip_id)
+        serializer.save(user=self.request.user, trip=trip)
+
+class ListFavoritesView(generics.ListAPIView):
+    serializer_class = FavoriteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user)
     
 class CityView(APIView):
     permission_classes = [AllowAny]
