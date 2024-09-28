@@ -12,6 +12,7 @@ from django.conf import settings
 import smtplib
 from email.mime.text import MIMEText
 import ssl
+from rest_framework.parsers import MultiPartParser, FormParser
 
 def home(request):
     return HttpResponse("wellcom to trip track backends")
@@ -124,6 +125,7 @@ class UserRegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegisterView_pk(APIView):
+    parser_classes = [MultiPartParser, FormParser]  # Ensure the view can handle form and file data
     permission_classes = [AllowAny]
     def get_object(self,pk):
         try:
@@ -143,6 +145,19 @@ class UserRegisterView_pk(APIView):
             serializer.save()
             return Response(serializer.data,status=201)
         return Response(serializer.errors,status=400)
+    
+    def patch(self, request, pk):
+        user = self.get_object(pk)
+
+        data = request.data.copy()
+        if 'image' in request.FILES:
+            data['image'] = request.FILES['image']
+
+        serializer = UserSerializer(user, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"image": user.image.url}, status=200)
+        return Response(serializer.errors, status=400)
     
     def delete(self,request,pk):
         user=self.get_object(pk)
