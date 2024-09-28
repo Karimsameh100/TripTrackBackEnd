@@ -220,11 +220,10 @@ class Review(models.Model):
     
     
 class Favorite(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    trip_id = models.ForeignKey(Trips, on_delete=models.CASCADE, related_name='favorites')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
     
-
-
+    
 
 class City(models.Model):
     Reviews = models.ManyToManyField(Review, related_name='cities')
