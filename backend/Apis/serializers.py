@@ -49,6 +49,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     ReviewCustomerDetails = UserSerializer(read_only=True)
+    ReviewCustomerDetails_id = serializers.PrimaryKeyRelatedField(
+        source='ReviewCustomerDetails',
+        queryset=User.objects.all(),
+        write_only=True
+    )
     class Meta:
         model = Review
         fields = '__all__'
