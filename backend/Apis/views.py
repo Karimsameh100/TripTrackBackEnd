@@ -357,9 +357,22 @@ class ReviewListCreateView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        # Assuming the city_id is passed in the request data
+        city_id = request.data.get('city_id')
+        if not city_id:
+            return Response({'error': 'City ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            city = City.objects.get(id=city_id)
+        except City.DoesNotExist:
+            return Response({'error': 'City not found'}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            review = serializer.save()
+            # Add the review to the city
+            city.Reviews.add(review)
+            city.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
