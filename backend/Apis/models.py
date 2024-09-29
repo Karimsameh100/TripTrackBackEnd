@@ -221,7 +221,7 @@ class Review(models.Model):
     
 class Favorite(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    trip = models.ForeignKey(Trips, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trips, on_delete=models.CASCADE,default=1)
     
     
 
