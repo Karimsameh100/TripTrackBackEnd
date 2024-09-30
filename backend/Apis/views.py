@@ -284,6 +284,52 @@ class mixinuser_pk(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.De
         return self.destroy(request, *args, **kwargs)
 
 # /////////////////////////////////////
+# class LoginView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def post(self, request):
+#         email = request.data.get('email')
+#         password = request.data.get('password')
+
+#         # Ensure the password is a string
+#         if not isinstance(password, str):
+#             return Response({"message": "Password must be a string."}, status=status.HTTP_400_BAD_REQUEST)
+        
+#         print(f"Attempting to authenticate: {email}")
+#         user = authenticate(request, email=email, password=password)
+
+#         if user is not None:
+#             # Determine if the user is a company or a regular user
+#             try:
+#                 company = Company.objects.get(allusers_ptr=user)
+#                 user_type = "company"
+#                 serializer = CompanySerializer(company)
+#                 print("Company found:", company)
+#                 admin = Admin.objects.get(allusers_ptr=admin)
+#                 user_type = "admin"
+#                 serializer = AdminSerializer(admin)
+#                 print("Company found:", admin)
+#             except Company.DoesNotExist:
+#                 user_type = "user"
+#                 serializer = UserSerializer(user)
+
+#             # Create a JWT token for the authenticated user
+#             refresh = RefreshToken.for_user(user)
+#             access_token = str(refresh.access_token)
+
+#             return Response({
+#                 "message": "Login successful",
+#                 "user_type": user_type,
+#                 "user_info": serializer.data,
+#                 "token": access_token,
+#                 "username": serializer.data.get('name') 
+#             }, status=status.HTTP_200_OK)
+        
+#         return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+from django.contrib.auth import authenticate
+
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -291,25 +337,31 @@ class LoginView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
 
-        # Ensure the password is a string
+        print("Email:", email)
+        print("Password:", password)
+
         if not isinstance(password, str):
             return Response({"message": "Password must be a string."}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         print(f"Attempting to authenticate: {email}")
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(username=email, password=password)
 
         if user is not None:
-            # Determine if the user is a company or a regular user
-            try:
-                company = Company.objects.get(allusers_ptr=user)
+            try :
+                company = Company.objects.get(allusers_ptr_id=user.id)
                 user_type = "company"
                 serializer = CompanySerializer(company)
                 print("Company found:", company)
             except Company.DoesNotExist:
-                user_type = "user"
-                serializer = UserSerializer(user)
+                try:
+                    admin = Admin.objects.get(allusers_ptr_id=user.id)
+                    user_type = "admin"
+                    serializer = AdminSerializer(admin)
+                    print("Admin found:", admin)
+                except Admin.DoesNotExist:
+                    user_type = "user"
+                    serializer = UserSerializer(user)
 
-            # Create a JWT token for the authenticated user
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
@@ -318,11 +370,10 @@ class LoginView(APIView):
                 "user_type": user_type,
                 "user_info": serializer.data,
                 "token": access_token,
-                "username": serializer.data.get('name') 
+                "username": serializer.data.get('name')
             }, status=status.HTTP_200_OK)
-        
-        return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
+        return Response({"message": "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class AllUsersView(APIView):
     permission_classes = [AllowAny]  # استخدم AllowAny مؤقتًا للتأكد من أن المشكلة ليست في الصلاحيات
