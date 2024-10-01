@@ -390,13 +390,77 @@ class AllUsersView(APIView):
 
 
 
-class ReviewPermissions(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method in ['GET', 'HEAD', 'OPTIONS']:
-            return True
-        elif request.method in ['POST', 'PUT', 'DELETE']:
-            return request.user.has_perm('reviews.change_review') or request.user.has_perm('reviews.add_review')
-        return False
+# class ReviewPermissions(permissions.BasePermission):
+#     def has_permission(self, request, view):
+#         if request.method in ['GET', 'HEAD', 'OPTIONS']:
+#             return True
+#         elif request.method in ['POST', 'PUT', 'DELETE']:
+#             return request.user.has_perm('reviews.change_review') or request.user.has_perm('reviews.add_review')
+#         return False
+    
+
+# class ReviewListCreateView(APIView):
+#     permission_classes = [AllowAny]
+
+#     def get(self, request):
+#         reviews = Review.objects.all()
+#         serializer = ReviewSerializer(reviews, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+#     def post(self, request):
+#         # Assuming the city_id is passed in the request data
+#         city_id = request.data.get('city_id')
+#         if not city_id:
+#             return Response({'error': 'City ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             city = City.objects.get(id=city_id)
+#         except City.DoesNotExist:
+#             return Response({'error': 'City not found'}, status=status.HTTP_404_NOT_FOUND)
+
+#         serializer = ReviewSerializer(data=request.data)
+#         if serializer.is_valid():
+#             review = serializer.save()
+#             # Add the review to the city
+#             city.Reviews.add(review)
+#             city.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class ReviewDetailView(APIView):
+#     permission_classes = [AllowAny]
+#     def get_object(self, pk):
+#         try:
+#             return Review.objects.get(pk=pk)
+#         except Review.DoesNotExist:
+#             return None
+
+#     def get(self, request, pk):
+#         review = self.get_object(pk)
+#         if review is None:
+#             return Response({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         serializer = ReviewSerializer(review)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def put(self, request, pk):
+#         review = self.get_object(pk)
+#         if review is None:
+#             return Response({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         serializer = ReviewSerializer(review, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#     def delete(self, request, pk):
+#         review = self.get_object(pk)
+#         if review is None:
+#             return Response({'error': 'Review not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+#         review.delete()
+#         return Response({'message': 'Review deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     
 
 class ReviewListCreateView(APIView):
@@ -406,7 +470,7 @@ class ReviewListCreateView(APIView):
         reviews = Review.objects.all()
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
     def post(self, request):
         # Assuming the city_id is passed in the request data
         city_id = request.data.get('city_id')
@@ -419,6 +483,7 @@ class ReviewListCreateView(APIView):
             return Response({'error': 'City not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ReviewSerializer(data=request.data)
+        print(serializer.is_valid())
         if serializer.is_valid():
             review = serializer.save()
             # Add the review to the city
@@ -462,6 +527,7 @@ class ReviewDetailView(APIView):
         review.delete()
         return Response({'message': 'Review deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     
+
 
 # from django.contrib.auth import authenticate
 

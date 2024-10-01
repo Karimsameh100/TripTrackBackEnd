@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager ,PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
+# from django.contrib.admin.models import LogEntry as AdminLogEntry
 
 
 
@@ -91,11 +92,11 @@ class User(AllUsers):
     def __str__(self):
         return self.email
 
-from django.db import models
-from django.contrib.admin.models import LogEntry as BaseLogEntry
+# from django.db import models
+# from django.contrib.admin.models import LogEntry as BaseLogEntry
 
-class LogEntry(BaseLogEntry):
-    admin_user = models.ForeignKey('Apis.Admin', on_delete=models.CASCADE, related_name='log_entries')
+# class LogEntry(AdminLogEntry):
+#     admin_user = models.ForeignKey('Apis.Admin', on_delete=models.CASCADE, related_name='log_entries')
 
 
 class Bus(models.Model):

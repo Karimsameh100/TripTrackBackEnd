@@ -47,6 +47,26 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
+# class ReviewSerializer(serializers.ModelSerializer):
+#     ReviewCustomerDetails = UserSerializer(read_only=True)
+#     ReviewCustomerDetails_id = serializers.PrimaryKeyRelatedField(
+#         source='ReviewCustomerDetails',
+#         queryset=User.objects.all(),
+#         write_only=True
+#     )
+#     class Meta:
+#         model = Review
+#         fields = '__all__'
+    
+#     def create(self, validated_data):
+#         return Review.objects.create(**validated_data)
+
+#     def update(self, instance, validated_data):
+#         instance.Review = validated_data.get('Review', instance.Review)
+#         instance.ReviewCustomerRate = validated_data.get('ReviewCustomerRate', instance.ReviewCustomerRate)
+#         instance.save()
+#         return instance
+
 class ReviewSerializer(serializers.ModelSerializer):
     ReviewCustomerDetails = UserSerializer(read_only=True)
     ReviewCustomerDetails_id = serializers.PrimaryKeyRelatedField(
@@ -194,6 +214,14 @@ class FavoriteSerializer(serializers.ModelSerializer):
             "trip_destination_Time": instance.trip.destinationTime,
         }
 
+
+# class CitySerializer(serializers.ModelSerializer):
+#     Reviews = ReviewSerializer(many=True, read_only=False)
+#     companies = CompanySerializer(many=True, read_only=False)
+
+#     class Meta:
+#         model = City
+#         fields = '__all__'
 
 class CitySerializer(serializers.ModelSerializer):
     Reviews = ReviewSerializer(many=True, read_only=False)

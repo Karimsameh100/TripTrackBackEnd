@@ -20,6 +20,6 @@ admin.site.register(Favorite)
 admin.site.register(City)
 
 # Register the LogEntry model
-@admin.register(LogEntry)
-class LogEntryAdmin(admin.ModelAdmin):
-    list_display = ['user', 'action_time', 'change_message']
+# @admin.register(LogEntry)
+# class LogEntryAdmin(admin.ModelAdmin):
+#     list_display = ['user', 'action_time', 'change_message']

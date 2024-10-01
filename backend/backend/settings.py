@@ -95,14 +95,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'cEFnQnzcZXKYVduwTsjFXzVNEedTJOWM',
-        'HOST': 'junction.proxy.rlwy.net',#127.0.0.1
-        'PORT': '27668',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'triptrack24',
+        'USER': 'trtr24',
+        'PASSWORD': 'trtr2424',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
-} 
+}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': 'postgres',
+#         'PASSWORD': 'cEFnQnzcZXKYVduwTsjFXzVNEedTJOWM',
+#         'HOST': 'junction.proxy.rlwy.net',#127.0.0.1
+#         'PORT': '27668',
+#     }
+# } 
 
 """ DATABASES = {
     'default': {
